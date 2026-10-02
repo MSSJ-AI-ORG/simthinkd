@@ -19,7 +19,7 @@
 
 <div align="center">
 
-[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](web/index.html) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
+[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](web/index.html) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Reproduce the paper](docs/REPRODUCE.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
 
 </div>
 
@@ -132,6 +132,8 @@ If you use SimThink D, please cite it with [CITATION.cff](CITATION.cff). GitHub 
 
 - Software: [doi:10.5281/zenodo.23111615](https://doi.org/10.5281/zenodo.23111615)
 - Paper (preprint): Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator", [doi:10.5281/zenodo.23111659](https://doi.org/10.5281/zenodo.23111659)
+
+The two bundled deciders are the exact deciders evaluated in the paper (same SHA-256). [docs/REPRODUCE.md](docs/REPRODUCE.md) lists what you can rerun from this repository and what is not released yet.
 
 ## Contributing
 
