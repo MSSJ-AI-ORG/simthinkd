@@ -5,6 +5,7 @@
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <a href="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml"><img src="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
   <a href="https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
+  <a href="https://doi.org/10.5281/zenodo.23111615"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23111615.svg" alt="DOI"></a>
 </p>
 
 **A tiny decision model that runs on one CPU core.** It has 265,665 parameters. It picks one action in about 2 ms. That is fast enough to decide inside every tick of a game or a control loop. No GPU is needed, not even for training.
@@ -20,6 +21,8 @@
 [Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](web/index.html) · [Gradio demo](space/) · [Paper](docs/PAPER.md) · [Protocol](docs/PROTOCOL.md)
 
 </div>
+
+Video: [a simulated factory line keeps running when the internet drops, with SimThink D deciding on the factory PC](https://www.linkedin.com/feed/update/urn:li:activity:7510142949981057024/) (LinkedIn).
 
 ## Words used here
 
@@ -120,6 +123,9 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 ## Citation
 
 If you use SimThink D, please cite it with [CITATION.cff](CITATION.cff). GitHub shows a "Cite this repository" button for it.
+
+- Software: [doi:10.5281/zenodo.23111615](https://doi.org/10.5281/zenodo.23111615)
+- Paper (preprint): Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator", [doi:10.5281/zenodo.23111659](https://doi.org/10.5281/zenodo.23111659)
 
 ## Contributing
 

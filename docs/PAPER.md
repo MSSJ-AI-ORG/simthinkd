@@ -1,4 +1,9 @@
 # Paper
 
-The paper behind SimThink D (separating the cost of decision time from the quality of the decision in real-time control) is under review.
-The link and citation will be added here when it is public.
+Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator.
+Chihoon Shin, Junyeong Lee, Kihyeok Jeong and Wonok Kwon.
+
+- Preprint (main text and supplementary material): https://doi.org/10.5281/zenodo.23111659
+- The paper is under review. The journal link will be added here when it is published.
+
+The paper asks one question: when a learned decider loses performance in a running system, is the loss caused by the time each decision takes, or by the quality of the decisions? It splits the gap into those two parts with a control that matches the decider's delay.

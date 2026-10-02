@@ -7,9 +7,25 @@ authors:
 version: 0.1.0
 date-released: "2026-10-03"
 license: Apache-2.0
+doi: 10.5281/zenodo.23111615
 repository-code: "https://github.com/MSSJ-AI-ORG/simthinkd"
 keywords:
   - decision model
   - real-time
   - game AI
   - imitation learning
+preferred-citation:
+  type: article
+  title: "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator"
+  authors:
+    - family-names: Shin
+      given-names: Chihoon
+    - family-names: Lee
+      given-names: Junyeong
+    - family-names: Jeong
+      given-names: Kihyeok
+    - family-names: Kwon
+      given-names: Wonok
+  doi: 10.5281/zenodo.23111659
+  year: 2026
+  notes: "Preprint"
