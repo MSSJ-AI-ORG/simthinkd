@@ -1,0 +1,14 @@
+SimThink D
+Copyright 2026 Myeongseongsimjae AX Institute
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Third-party works:
+- The decision request and reply format follows the public interface of browser-use/jev-ultrafast (MIT License).
+  No code or model weights from that project are included.
+- The comparison adapter in benchmarks/ talks to Laya by Convai Innovations (Apache License 2.0,
+  https://github.com/NandhaKishorM/laya). Laya is not bundled.
+- Doom scenes come from ViZDoom (MIT License, https://github.com/Farama-Foundation/ViZDoom). ViZDoom is not bundled.
+
+The SimThink D weights in src/simthinkd/weights were trained by the Myeongseongsimjae AX Institute
+from its own rule-teacher data.

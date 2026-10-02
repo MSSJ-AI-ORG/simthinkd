@@ -1,0 +1,86 @@
+{
+ "model": "doom-corridor",
+ "state": {
+  "page": {
+   "url": "doom://deadly_corridor",
+   "title": "deadly corridor tick 40",
+   "text": "enemies: ChaingunGuy ahead mid offset0 ; ShotgunGuy left near offset15 | goal: armor ahead distant | body scratched | ammo stocked"
+  },
+  "elements": [
+   {
+    "id": "MOVE_LEFT",
+    "role": "button",
+    "label": "MOVE_LEFT"
+   },
+   {
+    "id": "MOVE_RIGHT",
+    "role": "button",
+    "label": "MOVE_RIGHT"
+   },
+   {
+    "id": "ATTACK",
+    "role": "button",
+    "label": "ATTACK"
+   },
+   {
+    "id": "MOVE_FORWARD",
+    "role": "button",
+    "label": "MOVE_FORWARD"
+   },
+   {
+    "id": "MOVE_BACKWARD",
+    "role": "button",
+    "label": "MOVE_BACKWARD"
+   },
+   {
+    "id": "TURN_LEFT",
+    "role": "button",
+    "label": "TURN_LEFT"
+   },
+   {
+    "id": "TURN_RIGHT",
+    "role": "button",
+    "label": "TURN_RIGHT"
+   }
+  ],
+  "recent_actions": []
+ },
+ "questions": {
+  "operation": {
+   "type": "choice",
+   "criteria": {
+    "MOVE_LEFT": {
+     "element": "[button] MOVE_LEFT",
+     "description": "Sidestep left, away from fire."
+    },
+    "MOVE_RIGHT": {
+     "element": "[button] MOVE_RIGHT",
+     "description": "Sidestep right, away from fire."
+    },
+    "ATTACK": {
+     "element": "[button] ATTACK",
+     "description": "Shoot now; an enemy is lined up ahead."
+    },
+    "MOVE_FORWARD": {
+     "element": "[button] MOVE_FORWARD",
+     "description": "Advance down the corridor toward the armor."
+    },
+    "MOVE_BACKWARD": {
+     "element": "[button] MOVE_BACKWARD",
+     "description": "Back off from what is in front."
+    },
+    "TURN_LEFT": {
+     "element": "[button] TURN_LEFT",
+     "description": "Turn left toward something on the left."
+    },
+    "TURN_RIGHT": {
+     "element": "[button] TURN_RIGHT",
+     "description": "Turn right toward something on the right."
+    }
+   },
+   "instructions": {
+    "goal": "Clear the corridor and reach the green armor."
+   }
+  }
+ }
+}

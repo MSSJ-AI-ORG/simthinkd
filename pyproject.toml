@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simthinkd"
+version = "0.1.0"
+description = "A 265k-parameter decision model that picks one action in about 2 ms on one CPU core, inside real-time loops."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [{name = "Myeongseongsimjae AX Institute"}]
+dependencies = ["numpy>=1.26"]
+keywords = ["decision model", "real-time", "game AI", "agents", "vizdoom", "imitation learning"]
+classifiers = ["Programming Language :: Python :: 3", "License :: OSI Approved :: Apache Software License", "Topic :: Scientific/Engineering :: Artificial Intelligence"]
+
+[project.optional-dependencies]
+train = ["torch>=2.2"]
+mcp = ["mcp>=1.2"]
+langchain = ["langchain-core>=0.3"]
+demo = ["gradio>=4.0"]
+onnx = ["onnx>=1.15", "onnxruntime>=1.17"]
+
+[project.urls]
+Homepage = "https://github.com/MSSJ-AI-ORG/simthinkd"
+Issues = "https://github.com/MSSJ-AI-ORG/simthinkd/issues"
+
+[project.scripts]
+simthinkd = "simthinkd.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+simthinkd = ["weights/*.npz", "weights/SHA256SUMS", "data/*.json"]

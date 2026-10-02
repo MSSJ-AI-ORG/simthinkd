@@ -1,0 +1,319 @@
+#!/usr/bin/env python3
+"""Build the quickstart notebook."""
+import json
+from pathlib import Path
+
+
+def build_notebook():
+    """Build the notebook with all cells."""
+    cells = []
+
+    # Cell 1: Intro markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"tags": []},
+        "source": [
+            "# SimThink D: Decision Models that Fit in One Game Tick\n",
+            "\n",
+            "Make fast, tiny decision models from your own rules - no training data, no cloud, about 1 ms per call on one CPU core.\n",
+            "\n",
+            "This notebook walks through the key ideas:\n",
+            "- **Decider**: A trained model that picks one action from a situation sentence (in ~1 ms).\n",
+            "- **Teacher**: A function that writes the rules you want the decider to learn.\n",
+            "- **Tick**: One frame in a game (e.g., 1/35 second at 35 Hz). Your decision must fit inside."
+        ]
+    })
+
+    # Cell 2: Install (skip-execution)
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {"tags": ["skip-execution"]},
+        "outputs": [],
+        "source": [
+            "# Install simthinkd from GitHub (takes about 20 seconds).\n",
+            "!pip install \"simthinkd[train] @ git+https://github.com/MSSJ-AI-ORG/simthinkd\""
+        ]
+    })
+
+    # Cell 3: One decision markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"id": "one_decision"},
+        "source": [
+            "## One Decision in 3 Lines\n",
+            "\n",
+            "Load a pre-trained **Decider** (\"doom-defend\"), give it a situation sentence, get back the best action, confidence, and how long it took."
+        ]
+    })
+
+    # Cell 4: One decision code
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {"id": "cell_simple_decision"},
+        "outputs": [],
+        "source": [
+            "from simthinkd import Decider\n",
+            "\n",
+            "d = Decider(\"doom-defend\")\n",
+            "result = d.decide(\"seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25\")\n",
+            "print(result)"
+        ]
+    })
+
+    # Cell 5: Speed markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"id": "loop_1000"},
+        "source": [
+            "## Speed: 1,000 Decisions\n",
+            "\n",
+            "Run 1,000 fast decisions and show median time and p95 (95th percentile). At 35 Hz, one tick is 28.6 ms. If most decisions fit inside 28.6 ms, they fit inside the game frame."
+        ]
+    })
+
+    # Cell 6: Speed test code
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {"id": "cell_speed_test"},
+        "outputs": [],
+        "source": [
+            "import statistics\n",
+            "from simthinkd import Decider\n",
+            "\n",
+            "d = Decider(\"doom-defend\")\n",
+            "times = []\n",
+            "\n",
+            "for i in range(1000):\n",
+            "    result = d.decide(\"seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25\")\n",
+            "    times.append(result.ms)\n",
+            "\n",
+            "times_sorted = sorted(times)\n",
+            "median = statistics.median(times_sorted)\n",
+            "p95 = times_sorted[int(0.95 * len(times_sorted))]\n",
+            "tick_ms = 1000.0 / 35.0\n",
+            "within_tick = sum(1 for t in times if t <= tick_ms) / len(times)\n",
+            "\n",
+            "print(f\"Median: {median:.2f} ms\")\n",
+            "print(f\"P95: {p95:.2f} ms\")\n",
+            "print(f\"One tick at 35 Hz: {tick_ms:.1f} ms\")\n",
+            "print(f\"Decisions within one tick: {within_tick:.1%}\")"
+        ]
+    })
+
+    # Cell 7: Train your own markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"id": "your_own_rules"},
+        "source": [
+            "## Your Own Rules in 8 Seconds\n",
+            "\n",
+            "Write a tiny teacher (a function that says what action to take for each situation), generate examples, and train a decider. This example is a simple thermostat: maintain temperature in a comfort zone."
+        ]
+    })
+
+    # Cell 8: Train your own code
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {"id": "cell_train_own"},
+        "outputs": [],
+        "source": [
+            "import random\n",
+            "import simthinkd\n",
+            "\n",
+            "THERMOSTAT_ACTIONS = {\n",
+            "    'OFF': 'Turn off heating and cooling.',\n",
+            "    'HEAT': 'Turn on the heater.',\n",
+            "    'COOL': 'Turn on the air conditioner.',\n",
+            "}\n",
+            "THERMOSTAT_GOAL = 'Keep the room at a comfortable temperature between 20C and 24C.'\n",
+            "\n",
+            "def thermostat_teacher(state):\n",
+            "    temp = state['temp']\n",
+            "    setpoint = state['setpoint']\n",
+            "    if temp < setpoint - 1:\n",
+            "        return 'HEAT'\n",
+            "    elif temp > setpoint + 1:\n",
+            "        return 'COOL'\n",
+            "    else:\n",
+            "        return 'OFF'\n",
+            "\n",
+            "rng = random.Random(42)\n",
+            "examples = []\n",
+            "for _ in range(3000):\n",
+            "    temp = rng.uniform(15, 30)\n",
+            "    setpoint = rng.choice([20, 21, 22, 23, 24])\n",
+            "    state = {'temp': temp, 'setpoint': setpoint}\n",
+            "    action = thermostat_teacher(state)\n",
+            "    text = f\"temp {temp:.1f}C | setpoint {setpoint}C\"\n",
+            "    examples.append((text, action))\n",
+            "\n",
+            "print(f\"Generated {len(examples)} examples.\")\n",
+            "\n",
+            "d = simthinkd.fit(\n",
+            "    examples,\n",
+            "    THERMOSTAT_ACTIONS,\n",
+            "    goal=THERMOSTAT_GOAL,\n",
+            "    out=\"thermostat\",\n",
+            "    quiet=True,\n",
+            ")\n",
+            "print(\"Trained decider saved to thermostat folder.\")\n",
+            "\n",
+            "test_cases = [\n",
+            "    \"temp 18.0C | setpoint 22C\",\n",
+            "    \"temp 25.0C | setpoint 22C\",\n",
+            "    \"temp 21.5C | setpoint 22C\",\n",
+            "]\n",
+            "print(\"\\nTest predictions:\")\n",
+            "for case in test_cases:\n",
+            "    result = d.decide(case)\n",
+            "    print(f\"  {case:30s} -> {result.choice} ({result.confidence:.0%})\")"
+        ]
+    })
+
+    # Cell 9: Bench markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"id": "bench_doom"},
+        "source": [
+            "## Benchmark on Real Doom States\n",
+            "\n",
+            "Measure how fast and accurate the bundled doom-defend decider is on 1,050 recorded game states from ViZDoom's defend_the_center scenario."
+        ]
+    })
+
+    # Cell 10: Bench code
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {"id": "cell_bench"},
+        "outputs": [],
+        "source": [
+            "from simthinkd import bench\n",
+            "\n",
+            "result = bench.run()\n",
+            "print(bench.report(result))"
+        ]
+    })
+
+    # Cell 11: HTTP markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"id": "http_server"},
+        "source": [
+            "## Serve Over HTTP and Call It\n",
+            "\n",
+            "Start a simple HTTP server in a background thread and make decisions over the network. This is how you'd integrate the decider into a web app or a remote game engine."
+        ]
+    })
+
+    # Cell 12: HTTP code
+    cells.append({
+        "cell_type": "code",
+        "execution_count": None,
+        "metadata": {"id": "cell_http_server"},
+        "outputs": [],
+        "source": [
+            "import json\n",
+            "import threading\n",
+            "import time\n",
+            "import urllib.request\n",
+            "from http.server import HTTPServer, BaseHTTPRequestHandler\n",
+            "\n",
+            "from simthinkd import Decider\n",
+            "\n",
+            "DECIDER = Decider(\"doom-defend\")\n",
+            "\n",
+            "class DecisionHandler(BaseHTTPRequestHandler):\n",
+            "    def do_POST(self):\n",
+            "        if self.path != '/v1/systemone':\n",
+            "            self.send_response(404)\n",
+            "            self.end_headers()\n",
+            "            return\n",
+            "        \n",
+            "        content_length = int(self.headers.get('Content-Length', 0))\n",
+            "        body = json.loads(self.rfile.read(content_length).decode())\n",
+            "        answers = DECIDER.predict(body)\n",
+            "        \n",
+            "        self.send_response(200)\n",
+            "        self.send_header('Content-Type', 'application/json')\n",
+            "        self.end_headers()\n",
+            "        self.wfile.write(json.dumps({'answers': answers}).encode())\n",
+            "    \n",
+            "    def log_message(self, format, *args):\n",
+            "        pass\n",
+            "\n",
+            "server = HTTPServer(('127.0.0.1', 8000), DecisionHandler)\n",
+            "thread = threading.Thread(target=server.serve_forever, daemon=True)\n",
+            "thread.start()\n",
+            "print(\"Server started at http://127.0.0.1:8000\")\n",
+            "time.sleep(0.5)\n",
+            "\n",
+            "request = DECIDER.request(\"seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25\")\n",
+            "req = urllib.request.Request(\n",
+            "    'http://127.0.0.1:8000/v1/systemone',\n",
+            "    data=json.dumps(request).encode(),\n",
+            "    headers={'Content-Type': 'application/json'}\n",
+            ")\n",
+            "with urllib.request.urlopen(req) as response:\n",
+            "    reply = json.load(response)\n",
+            "    choice = reply['answers']['operation']['choice']\n",
+            "    conf = reply['answers']['operation']['confidence']\n",
+            "    print(f\"HTTP decision: {choice} ({conf:.0%})\")\n",
+            "\n",
+            "server.shutdown()\n",
+            "print(\"Server stopped.\")"
+        ]
+    })
+
+    # Cell 13: Next steps markdown
+    cells.append({
+        "cell_type": "markdown",
+        "metadata": {"id": "next_steps"},
+        "source": [
+            "## Next Steps\n",
+            "\n",
+            "1. **Try other presets**: `Decider(\"doom-corridor\")` for a different Doom scenario.\n",
+            "2. **Write your own teacher**: Replace `thermostat_teacher` with rules from your game or app.\n",
+            "3. **Tune training**: Increase `steps` in `simthinkd.fit()` for better accuracy, or adjust `goal` to change what the decider optimizes for.\n",
+            "4. **Deploy**: Use the HTTP server pattern (cell 6) to run the decider in production.\n",
+            "5. **Benchmark**: Use `bench.run()` on your own domain to measure speed and accuracy.\n",
+            "\n",
+            "For details, see the [SimThink D docs](https://github.com/MSSJ-AI-ORG/simthinkd)."
+        ]
+    })
+
+    # Create notebook
+    nb = {
+        "nbformat": 4,
+        "nbformat_minor": 4,
+        "metadata": {
+            "colab": {"provenance": []},
+            "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+            "language_info": {
+                "name": "python",
+                "version": "3.11.0",
+                "mimetype": "text/x-python",
+                "codemirror_mode": {"name": "ipython", "version": 3},
+                "pygments_lexer": "ipython3",
+                "nbconvert_exporter": "python",
+                "file_extension": ".py"
+            }
+        },
+        "cells": cells
+    }
+
+    # Write notebook
+    nb_path = Path("notebooks/quickstart.ipynb")
+    with open(nb_path, "w", encoding="utf8") as f:
+        json.dump(nb, f, indent=1, ensure_ascii=False)
+
+    print(f"Notebook created: {nb_path}")
+    return nb_path
+
+
+if __name__ == "__main__":
+    build_notebook()

@@ -1,0 +1,2 @@
+simthinkd @ git+https://github.com/MSSJ-AI-ORG/simthinkd
+gradio>=4.0.0

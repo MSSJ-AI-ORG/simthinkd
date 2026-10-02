@@ -1,0 +1,86 @@
+{
+ "model": "doom-showcase-s1",
+ "state": {
+  "page": {
+   "url": "doom://defend_the_center/showcase",
+   "title": "defend the center tick 120",
+   "text": "seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25"
+  },
+  "elements": [
+   {
+    "id": "TURN_LEFT",
+    "role": "button",
+    "label": "TURN_LEFT"
+   },
+   {
+    "id": "TURN_RIGHT",
+    "role": "button",
+    "label": "TURN_RIGHT"
+   },
+   {
+    "id": "ATTACK",
+    "role": "button",
+    "label": "ATTACK"
+   },
+   {
+    "id": "STRAFE_LEFT",
+    "role": "button",
+    "label": "STRAFE_LEFT"
+   },
+   {
+    "id": "STRAFE_RIGHT",
+    "role": "button",
+    "label": "STRAFE_RIGHT"
+   },
+   {
+    "id": "ATTACK_STRAFE_LEFT",
+    "role": "button",
+    "label": "ATTACK_STRAFE_LEFT"
+   },
+   {
+    "id": "ATTACK_STRAFE_RIGHT",
+    "role": "button",
+    "label": "ATTACK_STRAFE_RIGHT"
+   }
+  ],
+  "recent_actions": []
+ },
+ "questions": {
+  "operation": {
+   "type": "choice",
+   "criteria": {
+    "TURN_LEFT": {
+     "element": "[button] TURN_LEFT",
+     "description": "Turn left toward the target."
+    },
+    "TURN_RIGHT": {
+     "element": "[button] TURN_RIGHT",
+     "description": "Turn right toward the target."
+    },
+    "ATTACK": {
+     "element": "[button] ATTACK",
+     "description": "Shoot now, standing still."
+    },
+    "STRAFE_LEFT": {
+     "element": "[button] STRAFE_LEFT",
+     "description": "Sidestep left without shooting."
+    },
+    "STRAFE_RIGHT": {
+     "element": "[button] STRAFE_RIGHT",
+     "description": "Sidestep right without shooting."
+    },
+    "ATTACK_STRAFE_LEFT": {
+     "element": "[button] ATTACK_STRAFE_LEFT",
+     "description": "Shoot while sidestepping left."
+    },
+    "ATTACK_STRAFE_RIGHT": {
+     "element": "[button] ATTACK_STRAFE_RIGHT",
+     "description": "Shoot while sidestepping right."
+    }
+   },
+   "instructions": {
+    "goal": "Aim, shoot and sway to survive the horde."
+   }
+  }
+ }
+}
