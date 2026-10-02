@@ -23,7 +23,11 @@
 
 </div>
 
-Video: [a simulated factory line keeps running when the internet drops, with SimThink D deciding on the factory PC](https://www.linkedin.com/feed/update/urn:li:activity:7510142949981057024/) (LinkedIn).
+### Video: the internet goes down, the line keeps going
+
+<a href="assets/factory_fallback.mp4"><img src="assets/factory_fallback_poster.jpg" alt="Internet down. The line kept going." width="100%"></a>
+
+A cloud decision service runs a simulated inspection line, with SimThink D on the factory PC as its backup. When an answer does not come back in time, or the network is cut, SimThink D makes the decision. [Watch the video](assets/factory_fallback.mp4) (72 s) or see it [on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7510142949981057024/). The simulator is in [examples/factory_twin](examples/factory_twin/).
 
 ## Words used here
 
