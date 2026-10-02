@@ -19,7 +19,7 @@
 
 <div align="center">
 
-[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](web/index.html) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Reproduce the paper](docs/REPRODUCE.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
+[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](https://mssj-ai-org.github.io/simthinkd/) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Reproduce the paper](docs/REPRODUCE.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
 
 </div>
 
