@@ -1,6 +1,7 @@
 <p align="center"><b>SimThink D</b></p>
 
 <p align="center">
+  <a href="https://pypi.org/project/simthinkd/"><img src="https://img.shields.io/pypi/v/simthinkd" alt="PyPI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="License: Apache 2.0"></a>
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <a href="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml"><img src="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
@@ -34,13 +35,13 @@ Video: [a simulated factory line keeps running when the internet drops, with Sim
 ## Install
 
 ```bash
-pip install "simthinkd @ git+https://github.com/MSSJ-AI-ORG/simthinkd"
+pip install simthinkd
 ```
 
 That is all you need to make decisions. It only needs NumPy. To train your own decider, add the `train` extra (it adds PyTorch, CPU build is fine):
 
 ```bash
-pip install "simthinkd[train] @ git+https://github.com/MSSJ-AI-ORG/simthinkd"
+pip install "simthinkd[train]"
 ```
 
 ## Quickstart
@@ -103,7 +104,7 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 | Any language, any engine | `simthinkd serve doom-defend --port 11890`, then POST the [decision request](docs/PROTOCOL.md) to `/v1/systemone` |
 | Unity / C# | [docs/INTEGRATION_UNITY.md](docs/INTEGRATION_UNITY.md): a client loop that keeps the game running while it waits |
 | Browser | [web/](web/): the same model in plain JavaScript, no server |
-| MCP (Claude Desktop, Cursor and others) | `pip install "simthinkd[mcp] @ git+https://github.com/MSSJ-AI-ORG/simthinkd"`, then `python -m simthinkd.integrations.mcp_server` |
+| MCP (Claude Desktop, Cursor and others) | `pip install "simthinkd[mcp]"`, then `python -m simthinkd.integrations.mcp_server` |
 | LangChain / LangGraph | `from simthinkd.integrations.langchain_tool import simthinkd_tool` |
 
 ## How it works

@@ -31,8 +31,8 @@ def build_notebook():
         "metadata": {"tags": ["skip-execution"]},
         "outputs": [],
         "source": [
-            "# Install simthinkd from GitHub (takes about 20 seconds).\n",
-            "!pip install \"simthinkd[train] @ git+https://github.com/MSSJ-AI-ORG/simthinkd\""
+            "# Install simthinkd from PyPI (takes about 20 seconds).\n",
+            "!pip install \"simthinkd[train]\""
         ]
     })
 

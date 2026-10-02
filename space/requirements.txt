@@ -1,2 +1,2 @@
-simthinkd @ git+https://github.com/MSSJ-AI-ORG/simthinkd
+simthinkd>=0.1.0
 gradio>=4.0.0
