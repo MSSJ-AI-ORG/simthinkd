@@ -1,4 +1,4 @@
-<p align="center"><b>SimThink D</b></p>
+<p align="center"><img src="assets/banner.png" alt="SimThink D: a tiny decision model that runs on one CPU core" width="100%"></p>
 
 <p align="center">
   <a href="https://pypi.org/project/simthinkd/"><img src="https://img.shields.io/pypi/v/simthinkd" alt="PyPI"></a>
@@ -19,7 +19,7 @@
 
 <div align="center">
 
-[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](web/index.html) · [Gradio demo](space/) · [Paper](docs/PAPER.md) · [Protocol](docs/PROTOCOL.md)
+[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](web/index.html) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
 
 </div>
 
@@ -104,6 +104,7 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 | Any language, any engine | `simthinkd serve doom-defend --port 11890`, then POST the [decision request](docs/PROTOCOL.md) to `/v1/systemone` |
 | Unity / C# | [docs/INTEGRATION_UNITY.md](docs/INTEGRATION_UNITY.md): a client loop that keeps the game running while it waits |
 | Browser | [web/](web/): the same model in plain JavaScript, no server |
+| A factory line (simulator) | [examples/factory_twin/](examples/factory_twin/): an inspection conveyor with a 400 ms deadline per part |
 | MCP (Claude Desktop, Cursor and others) | `pip install "simthinkd[mcp]"`, then `python -m simthinkd.integrations.mcp_server` |
 | LangChain / LangGraph | `from simthinkd.integrations.langchain_tool import simthinkd_tool` |
 

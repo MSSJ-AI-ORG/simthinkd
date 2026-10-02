@@ -20,3 +20,5 @@ jobs:
         run: pip install -e ".[train]" --extra-index-url https://download.pytorch.org/whl/cpu
       - name: Package tests
         run: python -X utf8 tests/test_package.py
+      - name: Factory twin end-to-end
+        run: python -X utf8 tests/test_factory_twin.py

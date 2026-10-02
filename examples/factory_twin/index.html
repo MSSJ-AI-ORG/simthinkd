@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Factory Inspection Viewer</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0a0e14;
+  --surface: #141a24;
+  --border: #283849;
+  --muted: #8ba6b9;
+  --text: #d4e2f0;
+  --accent: #6ce0e8;
+  --pass: #b2e477;
+  --reject: #ff8f77;
+  --rework: #7ec7ff;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 system-ui, sans-serif;
+}
+
+header {
+  height: 60px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  background: var(--surface);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: calc(100vh - 60px);
+}
+
+aside {
+  border-right: 1px solid var(--border);
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+h2 {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  margin: 16px 0 12px;
+}
+
+h2:first-child { margin-top: 0; }
+
+.stat-group {
+  margin-bottom: 16px;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin: 6px 0;
+}
+
+.stat-label { color: var(--muted); }
+.stat-value { font-weight: 600; color: var(--text); }
+
+main {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.metric {
+  padding: 12px;
+  background: var(--surface);
+}
+
+.metric-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.metric-unit {
+  font-size: 10px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.section {
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+
+.trace-table {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  font-weight: 600;
+  padding: 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  color: var(--muted);
+}
+
+td {
+  padding: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover { background: rgba(108, 224, 232, 0.05); }
+
+.details-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.detail-row {
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.detail-label {
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  background: var(--bg);
+  padding: 6px;
+  border-radius: 4px;
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 11px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.badge-pass { background: rgba(178, 228, 119, 0.2); color: var(--pass); }
+.badge-reject { background: rgba(255, 143, 119, 0.2); color: var(--reject); }
+.badge-rework { background: rgba(126, 199, 255, 0.2); color: var(--rework); }
+.badge-late { background: rgba(255, 218, 129, 0.2); color: #ffda81; }
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted);
+}
+
+@media (max-width: 1200px) {
+  .container { grid-template-columns: 1fr; }
+  aside { display: none; }
+  .content { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .metrics-bar { grid-template-columns: 1fr 1fr; }
+  .metric { padding: 8px; }
+  .metric-value { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+<div>
+  <div class="title">FACTORY INSPECTION</div>
+  <div class="subtitle">SimThink D Viewer</div>
+</div>
+</header>
+
+<div class="container">
+  <aside>
+    <h2>Metrics</h2>
+    <div class="stat-group">
+      <div class="stat">
+        <span class="stat-label">Parts</span>
+        <span class="stat-value" id="stat-parts">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Defective</span>
+        <span class="stat-value" id="stat-defective">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Throughput</span>
+        <span class="stat-value" id="stat-throughput">—</span>
+      </div>
+    </div>
+
+    <h2>Quality</h2>
+    <div class="stat-group">
+      <div class="stat">
+        <span class="stat-label">Escape Rate</span>
+        <span class="stat-value" id="stat-escape">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">False Rejects</span>
+        <span class="stat-value" id="stat-false">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Late %</span>
+        <span class="stat-value" id="stat-late">—</span>
+      </div>
+    </div>
+
+    <h2>Decision</h2>
+    <div class="stat-group">
+      <div class="stat">
+        <span class="stat-label">P50 Latency</span>
+        <span class="stat-value" id="stat-latency-p50">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">P90 Latency</span>
+        <span class="stat-value" id="stat-latency-p90">—</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Correct %</span>
+        <span class="stat-value" id="stat-correct">—</span>
+      </div>
+    </div>
+
+    <h2>Config</h2>
+    <div id="config-summary" style="font-size: 11px; color: var(--muted); line-height: 1.8;"></div>
+  </aside>
+
+  <main>
+    <div class="metrics-bar">
+      <div class="metric">
+        <div class="metric-label">Throughput</div>
+        <div><span class="metric-value" id="metric-throughput">—</span> <span class="metric-unit">parts/min</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Escape Rate</div>
+        <div><span class="metric-value" id="metric-escape">—</span> <span class="metric-unit">%</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">False Reject</div>
+        <div><span class="metric-value" id="metric-false">—</span> <span class="metric-unit">%</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Late Decisions</div>
+        <div><span class="metric-value" id="metric-late">—</span> <span class="metric-unit">%</span></div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Decision P50</div>
+        <div><span class="metric-value" id="metric-latency">—</span> <span class="metric-unit">ms</span></div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="section">
+        <div class="section-title">Decision Trace</div>
+        <div class="trace-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Defect</th>
+                <th>Action</th>
+                <th>Late</th>
+                <th>Correct</th>
+              </tr>
+            </thead>
+            <tbody id="trace-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Part Details</div>
+        <div class="details-content" id="details-content">
+          <p style="color: var(--muted);">Select a row to view observation sentence.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+async function loadResult() {
+  try {
+    const response = await fetch('/api/result');
+    if (!response.ok) throw new Error('Result not found');
+    return await response.json();
+  } catch (err) {
+    document.body.innerHTML = '<div class="loading">Loading result from /api/result...</div>';
+    return null;
+  }
+}
+
+function formatPct(v) {
+  if (v === null || v === undefined) return '—';
+  return (v * 100).toFixed(1) + '%';
+}
+
+function formatNum(v) {
+  if (v === null || v === undefined) return '—';
+  if (Number.isInteger(v)) return v.toLocaleString();
+  return v.toFixed(1);
+}
+
+function buildActionBadge(op) {
+  const badgeClass = {
+    'PASS': 'pass',
+    'REJECT': 'reject',
+    'REWORK': 'rework',
+    'ESCALATE': 'reject',
+    'STOP_LINE': 'reject',
+  }[op] || 'reject';
+  return `<span class="badge badge-${badgeClass}">${op}</span>`;
+}
+
+function formatSentence(s) {
+  if (!s) return '(no observation)';
+  return s.replace(/\s\|/g, '\n|');
+}
+
+function renderResult(result) {
+  const metrics = result.metrics;
+  const parts = result.per_part;
+
+  // Update side stats
+  document.getElementById('stat-parts').textContent = formatNum(metrics.parts);
+  document.getElementById('stat-defective').textContent = formatNum(metrics.defective_parts);
+  document.getElementById('stat-throughput').textContent = (metrics.throughput_parts_per_min).toFixed(1);
+
+  document.getElementById('stat-escape').textContent = formatPct(metrics.escape_rate);
+  document.getElementById('stat-false').textContent = formatPct(metrics.false_reject_rate);
+  document.getElementById('stat-late').textContent = formatPct(metrics.late_rate);
+
+  document.getElementById('stat-latency-p50').textContent = formatNum(metrics.decision_ms_p50) + ' ms';
+  document.getElementById('stat-latency-p90').textContent = formatNum(metrics.decision_ms_p90) + ' ms';
+  document.getElementById('stat-correct').textContent = formatPct(metrics.correct_rate);
+
+  // Update top metrics bar
+  document.getElementById('metric-throughput').textContent = metrics.throughput_parts_per_min.toFixed(1);
+  document.getElementById('metric-escape').textContent = (metrics.escape_rate * 100).toFixed(0);
+  document.getElementById('metric-false').textContent = (metrics.false_reject_rate * 100).toFixed(0);
+  document.getElementById('metric-late').textContent = (metrics.late_rate * 100).toFixed(0);
+  document.getElementById('metric-latency').textContent = (metrics.decision_ms_p50 || 0).toFixed(1);
+
+  // Config summary
+  const cfg = result.config;
+  document.getElementById('config-summary').innerHTML = `
+    Arm: ${cfg.arm}<br>
+    Line: ${cfg.line}<br>
+    Parts: ${cfg.parts}<br>
+    Seed: ${cfg.seed}<br>
+    Defect rate: ${(cfg.defect_rate * 100).toFixed(0)}%
+  `;
+
+  // Build trace table
+  const tbody = document.getElementById('trace-body');
+  tbody.innerHTML = '';
+  for (const p of parts) {
+    const op = p.applied_action?.operation || 'N/A';
+    const row = document.createElement('tr');
+    row.style.cursor = 'pointer';
+    row.onclick = () => showDetails(p);
+    row.innerHTML = `
+      <td>${p.index}</td>
+      <td>${p.true_defect}</td>
+      <td>${buildActionBadge(op)}</td>
+      <td>${p.late ? 'YES' : 'NO'}</td>
+      <td>${p.correct ? 'YES' : 'NO'}</td>
+    `;
+    tbody.appendChild(row);
+  }
+}
+
+function showDetails(part) {
+  const details = document.getElementById('details-content');
+  const op = part.applied_action?.operation || 'N/A';
+  const target = part.applied_action?.[op.toLowerCase() + '_target'] || '';
+
+  details.innerHTML = `
+    <div class="detail-row">
+      <div class="metric-label">Part ID</div>
+      <div class="detail-value">${part.id}</div>
+    </div>
+    <div class="detail-row">
+      <div class="metric-label">Observation</div>
+      <div class="detail-value" style="white-space: pre-wrap;">
+        ${formatSentence(part.sentence)}
+      </div>
+    </div>
+    <div class="detail-row">
+      <div class="metric-label">Decision</div>
+      <div>${buildActionBadge(op)}</div>
+      ${target ? `<div style="font-size: 10px; color: var(--muted); margin-top: 4px;">→ ${target}</div>` : ''}
+    </div>
+    <div class="detail-row">
+      <div class="metric-label">Ground Truth</div>
+      <div>Defect: <strong>${part.true_defect}</strong>, Severity: <strong>${part.true_severity}</strong></div>
+    </div>
+    <div class="detail-row">
+      <div class="metric-label">Decision Latency</div>
+      <div>${part.decided_at_ms !== null ? part.decided_at_ms.toFixed(1) : 'N/A'} ms</div>
+    </div>
+  `;
+}
+
+async function main() {
+  const result = await loadResult();
+  if (result) {
+    renderResult(result);
+  }
+}
+
+main();
+</script>
+
+</body>
+</html>
