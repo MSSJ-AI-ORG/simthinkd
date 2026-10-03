@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SimThink D in your browser</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #ffffff;
+      --fg: #1a1a1a;
+      --border: #e0e0e0;
+      --accent: #e2571e;
+      --accent-light: #fdeee7;
+      --success: #2ecc71;
+      --space: 16px;
+      font-size: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a1a;
+        --fg: #f0f0f0;
+        --border: #333;
+        --accent-light: #0a1428;
+      }
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      padding: var(--space);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--fg);
+      opacity: 0.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space);
+      margin-top: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .panel h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .slider-group {
+      margin-bottom: 16px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none;
+      margin: 0 0 12px 0;
+      padding: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+
+    .result-panel {
+      grid-column: 1 / -1;
+    }
+
+    .choice-box {
+      background: var(--success);
+      color: white;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .choice-text {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .confidence-text {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .probs-container {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .prob-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .prob-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .prob-label {
+      min-width: 100px;
+      font-weight: 500;
+    }
+
+    .prob-bar-container {
+      flex: 1;
+      height: 20px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 8px;
+      overflow: hidden;
+    }
+
+    .prob-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    .prob-value {
+      min-width: 50px;
+      text-align: right;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .timing-info {
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: monospace;
+    }
+
+    .timing-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .timing-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .status {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      display: block;
+    }
+
+    .preset-info {
+      font-size: 12px;
+      margin-top: 8px;
+      padding: 8px;
+      background: var(--bg);
+      border-radius: 4px;
+      opacity: 0.8;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .control-input {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .control-input label {
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .control-input input {
+      padding: 6px;
+      font-size: 12px;
+      margin-bottom: 0;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    /* Brand tokens (Vermilion #E8631A, Graphite #191919, Paper #FBFAF7) and a two-column layout
+       where the inputs and the decision sit side by side and line up. */
+    :root { --bg: #FBFAF7; --fg: #191919; --border: #E7E2D9; --accent: #E8631A; --accent-light: #F4F1EC; --success: #191919; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #FBFAF7; --fg: #191919; --border: #E7E2D9; --accent-light: #F4F1EC; } }
+    body { font-family: Pretendard, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--fg); }
+    .container { max-width: 1112px; padding: 24px; }
+    header { text-align: left; margin-bottom: 20px; }
+    header h1 { font-size: 22px; font-weight: 750; }
+    .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+    .panel { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin: 0; }
+    .result-panel { grid-column: auto; }
+    .choice-box { background: var(--fg); border-radius: 8px; }
+    .choice-text { color: #fff; }
+    .confidence-text { color: #F07A38; }
+    button { background: var(--accent); border-radius: 8px; font-weight: 700; }
+    button:hover { background: #C24F12; }
+    @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } .container { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SimThink D in your browser</h1>
+      <p class="subtitle">The same 265k-parameter decider, running in this page. No server, no install.</p>
+    </header>
+
+    <div class="grid">
+      <!-- Config Panel -->
+      <div class="panel">
+        <h2>Configuration</h2>
+
+        <label for="preset">Preset:</label>
+        <select id="preset" onchange="onPresetChange()">
+          <option value="doom-defend">Doom: Defend the Center</option>
+          <option value="doom-corridor">Doom: Deadly Corridor</option>
+        </select>
+
+        <div class="preset-info" id="preset-info"></div>
+
+        <label for="situation">Situation:</label>
+        <textarea id="situation" placeholder="Describe the game state..."></textarea>
+
+        <div id="controls" style="display: none;">
+          <label style="margin-bottom: 12px; display: block;">Compose Situation:</label>
+          <div class="controls-grid" id="controls-grid"></div>
+        </div>
+
+        <button onclick="onDecide()" style="width: 100%; margin-top: 12px;">
+          Decide Now
+        </button>
+
+        <div class="status" id="status"></div>
+      </div>
+
+      <!-- Result Panel -->
+      <div class="panel result-panel">
+        <h2>Decision</h2>
+
+        <div id="result-container" style="display: none;">
+          <div class="choice-box">
+            <div class="choice-text" id="choice"></div>
+            <div class="confidence-text" id="confidence"></div>
+          </div>
+
+          <label>Action Probabilities:</label>
+          <div class="probs-container" id="probs-container"></div>
+
+          <div class="timing-info">
+            <div class="timing-row">
+              <span>Inference time (median):</span>
+              <span id="timing-median">—</span>
+            </div>
+            <div class="timing-row">
+              <span>Fits in 28.6 ms tick:</span>
+              <span id="timing-fits">—</span>
+            </div>
+            <div class="timing-row">
+              <span>Weights SHA256:</span>
+              <span id="weights-sha" style="font-size: 10px; font-family: monospace;">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="no-result" style="text-align: center; color: var(--fg); opacity: 0.5; padding: 40px 20px;">
+          Click "Decide Now" to see results
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { SimThinkD } from "../simthinkd.js";
+
+    let policy = null;
+    let weightsMetadata = null;
+
+    const presetConfigs = {
+      "doom-defend": {
+        file: "../weights/doom-defend.json",
+        controls: [
+          { name: "enemy", label: "Enemy", type: "select", options: ["no enemy", "Demon", "MarineChainsawVzd"], default: "Demon" },
+          { name: "side", label: "Side", type: "select", options: ["ahead", "left", "right"], default: "left" },
+          { name: "angle", label: "Angle", type: "range", min: 0, max: 60, step: 3, default: 30 },
+          { name: "distance", label: "Distance", type: "range", min: 0, max: 20, step: 1, default: 5 },
+          { name: "enemies", label: "# Enemies", type: "range", min: 1, max: 3, step: 1, default: 1 },
+          { name: "sway", label: "Sway", type: "select", options: ["left", "right"], default: "left" },
+          { name: "gun", label: "Gun", type: "select", options: ["ready", "wait"], default: "ready" },
+          { name: "ammo", label: "Ammo", type: "range", min: 0, max: 30, step: 5, default: 25 },
+        ],
+      },
+      "doom-corridor": {
+        file: "../weights/doom-corridor.json",
+        controls: [
+          { name: "enemy", label: "Enemy", type: "select", options: ["no enemy", "Zombieman", "ShotgunGuy", "ChaingunGuy"], default: "ShotgunGuy" },
+          { name: "side", label: "Side", type: "select", options: ["ahead", "left", "right"], default: "left" },
+          { name: "range", label: "Range", type: "select", options: ["near", "mid", "far"], default: "near" },
+          { name: "offset", label: "Offset", type: "range", min: 0, max: 90, step: 15, default: 15 },
+          { name: "armor", label: "Armor", type: "select", options: ["ahead distant", "ahead middle", "ahead close", "left middle", "right middle", "not visible"], default: "ahead distant" },
+          { name: "body", label: "Body", type: "select", options: ["healthy", "scratched", "hurt"], default: "healthy" },
+          { name: "ammo", label: "Ammo", type: "select", options: ["stocked", "low", "dry"], default: "stocked" },
+        ],
+      },
+    };
+
+    async function loadPreset(presetName) {
+      try {
+        const config = presetConfigs[presetName];
+        const response = await fetch(config.file);
+        weightsMetadata = await response.json();
+        policy = new SimThinkD(weightsMetadata);
+
+        // Update info
+        const infoEl = document.getElementById("preset-info");
+        infoEl.innerHTML = `
+          <strong>${presetName}</strong><br>
+          ${weightsMetadata.about || ""}<br>
+          Model: ${weightsMetadata.model}
+        `;
+
+        // Update controls
+        updateControls(config.controls);
+
+        // Set example
+        if (weightsMetadata.example) {
+          document.getElementById("situation").value = weightsMetadata.example;
+        }
+
+        return true;
+      } catch (e) {
+        console.error("Failed to load preset:", e);
+        showStatus(`Error loading ${presetName}: ${e.message}`, "error");
+        return false;
+      }
+    }
+
+    function updateControls(controls) {
+      const container = document.getElementById("controls-grid");
+      container.innerHTML = "";
+      for (const ctrl of controls) {
+        const div = document.createElement("div");
+        div.className = "control-input";
+
+        const label = document.createElement("label");
+        label.textContent = ctrl.label;
+        label.htmlFor = `ctrl-${ctrl.name}`;
+        div.appendChild(label);
+
+        if (ctrl.type === "select") {
+          const select = document.createElement("select");
+          select.id = `ctrl-${ctrl.name}`;
+          select.onchange = updateSituationFromControls;
+          for (const opt of ctrl.options) {
+            const option = document.createElement("option");
+            option.value = opt;
+            option.textContent = opt;
+            if (opt === ctrl.default) option.selected = true;
+            select.appendChild(option);
+          }
+          div.appendChild(select);
+        } else if (ctrl.type === "range") {
+          const input = document.createElement("input");
+          input.type = "range";
+          input.id = `ctrl-${ctrl.name}`;
+          input.min = ctrl.min;
+          input.max = ctrl.max;
+          input.step = ctrl.step;
+          input.value = ctrl.default;
+          input.onchange = updateSituationFromControls;
+          input.oninput = updateSituationFromControls;
+          div.appendChild(input);
+
+          const value = document.createElement("span");
+          value.style.fontSize = "12px";
+          value.textContent = ctrl.default;
+          value.id = `val-${ctrl.name}`;
+          div.appendChild(value);
+        }
+
+        container.appendChild(div);
+      }
+    }
+
+    function updateSituationFromControls() {
+      const preset = document.getElementById("preset").value;
+      const config = presetConfigs[preset];
+
+      if (preset === "doom-defend") {
+        const enemy = document.getElementById("ctrl-enemy")?.value || "Demon";
+        const side = document.getElementById("ctrl-side")?.value || "left";
+        const angle = document.getElementById("ctrl-angle")?.value || "30";
+        const distance = document.getElementById("ctrl-distance")?.value || "5";
+        const enemies = document.getElementById("ctrl-enemies")?.value || "1";
+        const sway = document.getElementById("ctrl-sway")?.value || "left";
+        const gun = document.getElementById("ctrl-gun")?.value || "ready";
+        const ammo = document.getElementById("ctrl-ammo")?.value || "25";
+
+        document.getElementById("val-angle").textContent = angle;
+        document.getElementById("val-distance").textContent = distance;
+        document.getElementById("val-enemies").textContent = enemies;
+        document.getElementById("val-ammo").textContent = ammo;
+
+        const text = enemy === "no enemy"
+          ? `seen: no enemy visible | enemies 0 | sway ${sway} | gun ${gun} | ammo${ammo}`
+          : `seen: ${enemy} ${side} a${angle} d${distance} | enemies ${enemies} | sway ${sway} | gun ${gun} | ammo${ammo}`;
+        document.getElementById("situation").value = text;
+      } else if (preset === "doom-corridor") {
+        const v = (n) => document.getElementById(`ctrl-${n}`).value;
+        document.getElementById("val-offset").textContent = v("offset");
+        const enemy = v("enemy") === "no enemy" ? "no enemy visible" : `${v("enemy")} ${v("side")} ${v("range")} offset${v("offset")}`;
+        const armor = v("armor") === "not visible" ? "armor not visible" : `armor ${v("armor")}`;
+        document.getElementById("situation").value =
+          `enemies: ${enemy} | goal: ${armor} | body ${v("body")} | ammo ${v("ammo")}`;
+      }
+      onDecide();
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById("status");
+      el.textContent = msg;
+      el.className = `status ${type}`;
+    }
+
+    async function onDecide() {
+      const text = document.getElementById("situation").value.trim();
+      if (!text) {
+        showStatus("Please enter a situation", "error");
+        return;
+      }
+
+      showStatus("Inferring...", "loading");
+
+      // Measure timing
+      const times = [];
+      for (let i = 0; i < 50; i++) {
+        const start = performance.now();
+        const result = policy.decide(text);
+        const ms = performance.now() - start;
+        times.push(ms);
+      }
+
+      times.sort((a, b) => a - b);
+      const median = times[Math.floor(times.length / 2)];
+      const result = policy.decide(text);
+
+      showStatus("", "");
+
+      // Display result
+      document.getElementById("result-container").style.display = "block";
+      document.getElementById("no-result").style.display = "none";
+
+      document.getElementById("choice").textContent = result.choice;
+      document.getElementById("confidence").textContent =
+        `${(result.confidence * 100).toFixed(1)}% confidence`;
+
+      // Probabilities
+      const probsHtml = Object.entries(result.probabilities)
+        .sort((a, b) => b[1] - a[1])
+        .map(([op, prob]) => {
+          const pct = (prob * 100).toFixed(1);
+          return `
+        <div class="prob-row">
+          <div class="prob-label">${op}</div>
+          <div class="prob-bar-container">
+            <div class="prob-bar" style="width: ${pct}%"></div>
+          </div>
+          <div class="prob-value">${pct}%</div>
+        </div>
+      `;
+        })
+        .join("");
+      document.getElementById("probs-container").innerHTML = probsHtml;
+
+      // Timing
+      document.getElementById("timing-median").textContent = `${median.toFixed(2)} ms`;
+      document.getElementById("timing-fits").textContent =
+        median < 28.6 ? "✓ Yes" : "✗ No";
+      document.getElementById("weights-sha").textContent = weightsMetadata.sha256.slice(0, 16) + "...";
+    }
+
+    async function onPresetChange() {
+      const preset = document.getElementById("preset").value;
+      showStatus("Loading preset...", "loading");
+      if (await loadPreset(preset)) {
+        document.getElementById("controls").style.display = "block";
+        updateSituationFromControls();
+        showStatus("", "");
+      }
+    }
+
+    // Initialize
+    (async () => {
+      if (await loadPreset("doom-defend")) {
+        document.getElementById("controls").style.display = "block";
+        updateSituationFromControls();
+        showStatus("", "");
+      }
+    })();
+
+    // Inline onclick/onchange handlers need globals (module scope is private).
+    window.onDecide = onDecide;
+    window.onPresetChange = onPresetChange;
+    window.policy = () => policy;
+  </script>
+</body>
+</html>

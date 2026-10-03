@@ -1,4 +1,4 @@
-"""Browser demo end to end: serve web/, open index.html in headless Chromium, make a decision, read the time.
+"""Browser demo end to end: serve web/, open demo/index.html in headless Chromium, make a decision, read the time.
 
     python -X utf8 tests/test_web_page.py          (needs: pip install playwright; playwright install chromium)
 Checks: page loads without console errors, the example decision is TURN_LEFT, a time and the one-tick verdict
@@ -20,7 +20,7 @@ def main():
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(ROOT / 'web'))
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    url = f'http://127.0.0.1:{server.server_address[1]}/index.html'
+    url = f'http://127.0.0.1:{server.server_address[1]}/demo/index.html'
     checks, errors = [], []
     with sync_playwright() as p:
         browser = p.chromium.launch()

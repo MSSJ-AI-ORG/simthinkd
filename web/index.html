@@ -1,632 +1,293 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SimThink D in your browser</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SimThink D: a tiny decision model for real time</title>
+<meta name="description" content="SimThink D reads one short sentence about the situation and picks an action in about 2 ms on one CPU core. Open source, Apache 2.0.">
+<meta property="og:title" content="SimThink D: a tiny decision model for real time">
+<meta property="og:description" content="About 2 ms per decision on one CPU core. 265,665 parameters. Trains on a CPU in seconds.">
+<meta property="og:image" content="https://raw.githubusercontent.com/MSSJ-AI-ORG/simthinkd/main/assets/social_preview.png">
+<link rel="icon" href="media/simthink_mark.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root {
+  /* Brand: Vermilion #E8631A is the only accent; #A8410A for orange text at body size on light paper */
+  --ink: #191919; --muted: #55524d; --line: #E7E2D9; --soft: #F4F1EC;
+  --orange: #E8631A; --orange-text: #A8410A; --orange-soft: #FBEDE4; --bg: #FBFAF7; --code: #191919;
+  --max: 1160px; --gutter: 24px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--ink); font-family: Pretendard, -apple-system, "Segoe UI", Roboto, sans-serif;
+       font-size: 18px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word; }
+a { color: inherit; }
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 var(--gutter); }
+code, pre { font-family: "JetBrains Mono", Consolas, Menlo, monospace; }
 
-    :root {
-      --bg: #ffffff;
-      --fg: #1a1a1a;
-      --border: #e0e0e0;
-      --accent: #0066cc;
-      --accent-light: #f0f7ff;
-      --success: #2ecc71;
-      --space: 16px;
-      font-size: 16px;
-    }
+/* nav */
+nav { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 10; }
+nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; text-decoration: none; }
+.brand img { height: 30px; }
+.by { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--muted); font-size: 13px; padding-left: 14px; border-left: 1px solid var(--line); }
+.by img { height: 30px; }
+nav .links { margin-left: auto; display: flex; gap: 24px; font-size: 16px; }
+nav .links a { text-decoration: none; color: var(--muted); }
+nav .links a:hover { color: var(--ink); }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1a1a1a;
-        --fg: #f0f0f0;
-        --border: #333;
-        --accent-light: #0a1428;
-      }
-    }
+/* hero */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line);
+        background: #fff url("media/hero.jpg") no-repeat right center / auto 100%; }
+.hero .wrap { min-height: 600px; display: flex; align-items: center; }
+.hero-text { max-width: 560px; padding: 72px 0; background: linear-gradient(90deg, rgba(255,255,255,.96) 70%, rgba(255,255,255,0)); }
+.pill { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 600; color: var(--orange-text);
+        background: var(--orange-soft); padding: 5px 12px; border-radius: 999px; text-decoration: none; }
+h1 { font-size: 60px; font-weight: 750; line-height: 1.08; letter-spacing: -0.02em; margin: 20px 0 18px; }
+h1 em { font-style: normal; color: var(--orange); }
+.sub { font-size: 20px; color: var(--muted); max-width: 500px; }
+.sub strong { color: var(--ink); }
+.install { margin-top: 28px; display: flex; align-items: center; justify-content: space-between; gap: 12px; max-width: 420px;
+           background: var(--code); color: #fff; border-radius: 10px; padding: 14px 16px; font-size: 17px; }
+.install code::before { content: "$ "; color: #8a8a92; }
+.install button { background: none; border: 1px solid #3a3a40; color: #c8c8ce; border-radius: 6px; padding: 4px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+.ctas { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; border-radius: 10px; font-weight: 700; font-size: 17px; text-decoration: none; }
+.btn.primary { background: var(--orange); color: #fff; }
+.btn.ghost { border: 1px solid var(--line); background: #fff; }
+.next { display: inline-block; margin-top: 16px; font-size: 15px; font-weight: 600; }
 
-    body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.6;
-      word-break: keep-all;
-      overflow-wrap: break-word;
-      padding: var(--space);
-      transition: background 0.3s, color 0.3s;
-    }
+/* sections */
+section { padding: 96px 0; border-bottom: 1px solid var(--line); }
+section.soft { background: var(--soft); }
+.kicker { font-size: 15px; font-weight: 700; color: var(--orange-text); letter-spacing: .04em; text-transform: uppercase; }
+h2 { font-size: 42px; font-weight: 750; line-height: 1.15; letter-spacing: -0.015em; margin: 10px 0 14px; }
+.lead { font-size: 20px; color: var(--muted); max-width: 720px; }
 
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
+/* timing chart (Bun-style: our own measurements, with a reproduce link) */
+.timing { margin-top: 40px; display: grid; gap: 26px; max-width: 880px; }
+.row .label { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; margin-bottom: 8px; }
+.row .label > span:last-child { white-space: nowrap; font-weight: 600; }
+.row .label b { font-size: 18px; }
+.bar { position: relative; height: 34px; background: #ECE8E1; border-radius: 8px; overflow: hidden; }
+.bar span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--orange); border-radius: 8px; min-width: 6px; }
+.bar i { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 14px; color: var(--muted); }
+.legend { display: flex; gap: 20px; font-size: 15px; color: var(--muted); margin-top: 6px; flex-wrap: wrap; }
+.legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.legend .a::before { background: var(--orange); } .legend .b::before { background: #ECE8E1; }
+.note { font-size: 15px; color: var(--muted); margin-top: 14px; }
 
-    header {
-      margin-bottom: 32px;
-      text-align: center;
-    }
+/* video + stats */
+.media { margin-top: 36px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+.media video { display: block; width: 100%; height: auto; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 32px; }
+.stat { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+.stat b { display: block; font-size: 44px; line-height: 1.1; color: var(--orange); letter-spacing: -0.01em; }
+.stat span { font-size: 17px; color: var(--muted); }
 
-    h1 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
+/* demo */
+.demo { margin-top: 32px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; }
+.demo iframe { display: block; width: 100%; height: 980px; border: 0; }
 
-    .subtitle {
-      font-size: 14px;
-      color: var(--fg);
-      opacity: 0.7;
-    }
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+.card { border: 1px solid var(--line); border-radius: 14px; padding: 26px; background: #fff; }
+.card h3 { font-size: 21px; margin-bottom: 8px; }
+.card p { font-size: 17px; color: var(--muted); }
+.card code { background: var(--soft); padding: 1px 6px; border-radius: 5px; font-size: 15px; color: var(--ink); }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space);
-      margin-top: 24px;
-    }
+/* code */
+pre.code { margin-top: 30px; background: var(--code); color: #e8e8ec; border-radius: 14px; padding: 26px; font-size: 16px; line-height: 1.7; overflow-x: auto; }
+pre.code .c { color: #8a8a92; } pre.code .k { color: #ff9a6b; } pre.code .s { color: #9fd99b; }
 
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
+/* paper */
+.paper { margin-top: 28px; border-left: 4px solid var(--orange); padding: 6px 0 6px 22px; }
+.paper p { font-size: 19px; }
+.paper .meta { color: var(--muted); font-size: 16px; margin-top: 6px; }
+.doi { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
 
-    .panel {
-      background: var(--accent-light);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px;
-    }
+footer { padding: 40px 0 60px; color: var(--muted); font-size: 15px; }
+.foot-brand { display: flex; align-items: center; gap: 12px; }
+.foot-brand img { height: 36px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 
-    .panel h2 {
-      font-size: 18px;
-      margin-bottom: 16px;
-      font-weight: 600;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    select,
-    input,
-    textarea {
-      width: 100%;
-      padding: 8px 12px;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: inherit;
-      font-size: 14px;
-    }
-
-    textarea {
-      min-height: 80px;
-      resize: vertical;
-    }
-
-    .slider-group {
-      margin-bottom: 16px;
-    }
-
-    .slider-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--border);
-      border-radius: 3px;
-      outline: none;
-      margin: 0 0 12px 0;
-      padding: 0;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    button {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    button:active {
-      opacity: 0.8;
-    }
-
-    .result-panel {
-      grid-column: 1 / -1;
-    }
-
-    .choice-box {
-      background: var(--success);
-      color: white;
-      padding: 16px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .choice-text {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .confidence-text {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .probs-container {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .prob-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-
-    .prob-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .prob-label {
-      min-width: 100px;
-      font-weight: 500;
-    }
-
-    .prob-bar-container {
-      flex: 1;
-      height: 20px;
-      background: var(--border);
-      border-radius: 2px;
-      margin: 0 8px;
-      overflow: hidden;
-    }
-
-    .prob-bar {
-      height: 100%;
-      background: var(--accent);
-      transition: width 0.3s;
-    }
-
-    .prob-value {
-      min-width: 50px;
-      text-align: right;
-      font-family: monospace;
-      font-size: 12px;
-    }
-
-    .timing-info {
-      margin-top: 16px;
-      padding: 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      font-size: 12px;
-      font-family: monospace;
-    }
-
-    .timing-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .timing-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .status {
-      margin-top: 12px;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-size: 12px;
-      display: none;
-    }
-
-    .status.loading {
-      background: #fff3cd;
-      color: #856404;
-      display: block;
-    }
-
-    .status.error {
-      background: #f8d7da;
-      color: #721c24;
-      display: block;
-    }
-
-    .preset-info {
-      font-size: 12px;
-      margin-top: 8px;
-      padding: 8px;
-      background: var(--bg);
-      border-radius: 4px;
-      opacity: 0.8;
-    }
-
-    .controls-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .control-input {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .control-input label {
-      margin-bottom: 4px;
-      font-size: 12px;
-    }
-
-    .control-input input {
-      padding: 6px;
-      font-size: 12px;
-      margin-bottom: 0;
-    }
-  </style>
+@media (max-width: 900px) {
+  .hero { background-size: 160% auto; background-position: 70% bottom; }
+  .hero .wrap { min-height: 0; align-items: flex-start; }
+  .hero-text { padding: 48px 0 300px; background: none; }
+  h1 { font-size: 42px; } h2 { font-size: 32px; }
+  .cards, .stats { grid-template-columns: 1fr; }
+  section { padding: 64px 0; }
+  nav .links a.hide-sm { display: none; }
+  .by span { display: none; } .by { padding-left: 10px; }
+  .demo iframe { height: 1500px; }
+}
+@media (max-width: 480px) {
+  :root { --gutter: 16px; }
+  body { font-size: 17px; }
+  h1 { font-size: 36px; }
+  .install { font-size: 15px; }
+  .stat b { font-size: 38px; }
+}
+</style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>SimThink D in your browser</h1>
-      <p class="subtitle">The same 265k-parameter decider, running in this page. No server, no install.</p>
-    </header>
 
-    <div class="grid">
-      <!-- Config Panel -->
-      <div class="panel">
-        <h2>Configuration</h2>
-
-        <label for="preset">Preset:</label>
-        <select id="preset" onchange="onPresetChange()">
-          <option value="doom-defend">Doom: Defend the Center</option>
-          <option value="doom-corridor">Doom: Deadly Corridor</option>
-        </select>
-
-        <div class="preset-info" id="preset-info"></div>
-
-        <label for="situation">Situation:</label>
-        <textarea id="situation" placeholder="Describe the game state..."></textarea>
-
-        <div id="controls" style="display: none;">
-          <label style="margin-bottom: 12px; display: block;">Compose Situation:</label>
-          <div class="controls-grid" id="controls-grid"></div>
-        </div>
-
-        <button onclick="onDecide()" style="width: 100%; margin-top: 12px;">
-          Decide Now
-        </button>
-
-        <div class="status" id="status"></div>
-      </div>
-
-      <!-- Result Panel -->
-      <div class="panel result-panel" style="grid-column: 1 / -1;">
-        <h2>Decision</h2>
-
-        <div id="result-container" style="display: none;">
-          <div class="choice-box">
-            <div class="choice-text" id="choice"></div>
-            <div class="confidence-text" id="confidence"></div>
-          </div>
-
-          <label>Action Probabilities:</label>
-          <div class="probs-container" id="probs-container"></div>
-
-          <div class="timing-info">
-            <div class="timing-row">
-              <span>Inference time (median):</span>
-              <span id="timing-median">—</span>
-            </div>
-            <div class="timing-row">
-              <span>Fits in 28.6 ms tick:</span>
-              <span id="timing-fits">—</span>
-            </div>
-            <div class="timing-row">
-              <span>Weights SHA256:</span>
-              <span id="weights-sha" style="font-size: 10px; font-family: monospace;">—</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="no-result" style="text-align: center; color: var(--fg); opacity: 0.5; padding: 40px 20px;">
-          Click "Decide Now" to see results
-        </div>
-      </div>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><img src="media/simthink_mark.png" alt="">SimThink D</a>
+    <a class="by" href="https://mssj.ai" aria-label="by MSSJ (Myeongseongsimjae)"><span>by</span><img src="media/mssj_logo.png" alt="MSSJ (Myeongseongsimjae)"></a>
+    <div class="links">
+      <a href="#demo">Demo</a>
+      <a class="hide-sm" href="#factory">Factory</a>
+      <a class="hide-sm" href="#paper">Paper</a>
+      <a href="https://github.com/MSSJ-AI-ORG/simthinkd">GitHub</a>
     </div>
   </div>
+</nav>
 
-  <script type="module">
-    import { SimThinkD } from "./simthinkd.js";
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-text">
+      <a class="pill" href="https://pypi.org/project/simthinkd/">v0.1.0 · open source, Apache 2.0</a>
+      <h1>A <em>tiny</em> decision model that keeps up with real time.</h1>
+      <p class="sub">It reads one short sentence about the situation and picks an action in about 2 ms on one CPU core.
+        <strong>No GPU, not even for training.</strong></p>
+      <div class="install"><code id="pip">pip install simthinkd</code><button type="button" id="copy">Copy</button></div>
+      <div class="ctas">
+        <a class="btn primary" href="#demo">Try it in your browser</a>
+        <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd">GitHub</a>
+      </div>
+      <a class="next" href="https://github.com/MSSJ-AI-ORG/simthinkd#quickstart">Then follow the quickstart →</a>
+    </div>
+  </div>
+</header>
 
-    let policy = null;
-    let weightsMetadata = null;
+<section id="timing">
+  <div class="wrap">
+    <div class="kicker">Fits inside the deadline</div>
+    <h2>Decide before the world moves on.</h2>
+    <p class="lead">A game or a machine does not wait. Each bar is the time you have. The orange part is the time SimThink D used.</p>
+    <div class="timing">
+      <div class="row">
+        <div class="label"><span><b>Doom</b>, one tick at 35 ticks per second</span><span>1.9 ms of 28.6 ms</span></div>
+        <div class="bar"><span style="width:6.64%"></span><i>28.6 ms</i></div>
+      </div>
+      <div class="row">
+        <div class="label"><span><b>Inspection conveyor</b>, before the part reaches the diverter</span><span>20 ms of 400 ms</span></div>
+        <div class="bar"><span style="width:5%"></span><i>400 ms</i></div>
+      </div>
+    </div>
+    <div class="legend"><span class="a">SimThink D decision time (median)</span><span class="b">time available</span></div>
+    <p class="note">Medians measured on our test PCs. In the conveyor run the decider is called over HTTP.
+      Your numbers will differ, so measure them: <code>simthinkd bench</code> ·
+      <a href="https://github.com/MSSJ-AI-ORG/simthinkd/blob/main/docs/REPRODUCE.md">reproduce</a></p>
+  </div>
+</section>
 
-    const presetConfigs = {
-      "doom-defend": {
-        file: "weights/doom-defend.json",
-        controls: [
-          { name: "enemy", label: "Enemy", type: "select", options: ["no enemy", "Demon", "MarineChainsawVzd"], default: "Demon" },
-          { name: "side", label: "Side", type: "select", options: ["ahead", "left", "right"], default: "left" },
-          { name: "angle", label: "Angle", type: "range", min: 0, max: 60, step: 3, default: 30 },
-          { name: "distance", label: "Distance", type: "range", min: 0, max: 20, step: 1, default: 5 },
-          { name: "enemies", label: "# Enemies", type: "range", min: 1, max: 3, step: 1, default: 1 },
-          { name: "sway", label: "Sway", type: "select", options: ["left", "right"], default: "left" },
-          { name: "gun", label: "Gun", type: "select", options: ["ready", "wait"], default: "ready" },
-          { name: "ammo", label: "Ammo", type: "range", min: 0, max: 30, step: 5, default: 25 },
-        ],
-      },
-      "doom-corridor": {
-        file: "weights/doom-corridor.json",
-        controls: [
-          { name: "enemy", label: "Enemy", type: "select", options: ["no enemy", "Zombieman", "ShotgunGuy", "ChaingunGuy"], default: "ShotgunGuy" },
-          { name: "side", label: "Side", type: "select", options: ["ahead", "left", "right"], default: "left" },
-          { name: "range", label: "Range", type: "select", options: ["near", "mid", "far"], default: "near" },
-          { name: "offset", label: "Offset", type: "range", min: 0, max: 90, step: 15, default: 15 },
-          { name: "armor", label: "Armor", type: "select", options: ["ahead distant", "ahead middle", "ahead close", "left middle", "right middle", "not visible"], default: "ahead distant" },
-          { name: "body", label: "Body", type: "select", options: ["healthy", "scratched", "hurt"], default: "healthy" },
-          { name: "ammo", label: "Ammo", type: "select", options: ["stocked", "low", "dry"], default: "stocked" },
-        ],
-      },
-    };
+<section id="factory" class="soft">
+  <div class="wrap">
+    <div class="kicker">On a simulated inspection line</div>
+    <h2>Internet down. The line kept going.</h2>
+    <p class="lead">A cloud service decides first. When its answer is not back in 0.33 seconds, SimThink D on the factory PC decides.
+      Then we cut the network for 15 seconds.</p>
+    <div class="media">
+      <video controls preload="metadata" playsinline poster="media/factory_fallback_poster.jpg">
+        <source src="media/factory_fallback.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>59 / 63</b><span>parts right during the outage</span></div>
+      <div class="stat"><b>54% → 94.7%</b><span>parts handled correctly, whole run</span></div>
+      <div class="stat"><b>0</b><span>late decisions</span></div>
+    </div>
+    <p class="note">A simulated line, and the decider learned this line's own rules, so it has a home advantage.
+      The simulator is in <a href="https://github.com/MSSJ-AI-ORG/simthinkd/tree/main/examples/factory_twin">examples/factory_twin</a>.</p>
+  </div>
+</section>
 
-    async function loadPreset(presetName) {
-      try {
-        const config = presetConfigs[presetName];
-        const response = await fetch(config.file);
-        weightsMetadata = await response.json();
-        policy = new SimThinkD(weightsMetadata);
+<section id="demo">
+  <div class="wrap">
+    <div class="kicker">Live demo</div>
+    <h2>Try it right here.</h2>
+    <p class="lead">The two Doom deciders from the paper run in this page, in plain JavaScript. Change the situation and press Decide.</p>
+    <div class="demo"><iframe id="demoframe" src="demo/" title="SimThink D browser demo" loading="lazy"></iframe></div>
+  </div>
+</section>
 
-        // Update info
-        const infoEl = document.getElementById("preset-info");
-        infoEl.innerHTML = `
-          <strong>${presetName}</strong><br>
-          ${weightsMetadata.about || ""}<br>
-          Model: ${weightsMetadata.model}
-        `;
+<section id="features">
+  <div class="wrap">
+    <div class="kicker">What you get</div>
+    <h2>Small, fast and easy to own.</h2>
+    <div class="cards">
+      <div class="card"><h3>One CPU core</h3><p>About 2 ms per decision with 265,665 parameters. No GPU and no network needed.</p></div>
+      <div class="card"><h3>Train in seconds</h3><p>Write your rules as a normal function. The toy task in the README trains on a CPU in about 8 seconds.</p></div>
+      <div class="card"><h3>NumPy only</h3><p>Making decisions needs only NumPy. Training adds PyTorch, and the CPU build is fine.</p></div>
+      <div class="card"><h3>Plugs into your stack</h3><p>An HTTP server, an MCP server and a LangChain tool come with the package.</p></div>
+      <div class="card"><h3>Measure your own model</h3><p><code>simthinkd bench</code> replays 1,050 recorded Doom states and tells you if a decider answers within one tick.</p></div>
+      <div class="card"><h3>Checkable</h3><p>The two bundled deciders are the ones evaluated in the paper. Their SHA-256 hashes are listed so you can check.</p></div>
+    </div>
+  </div>
+</section>
 
-        // Update controls
-        updateControls(config.controls);
+<section id="code" class="soft">
+  <div class="wrap">
+    <div class="kicker">Quickstart</div>
+    <h2>One call is one decision.</h2>
+<pre class="code"><span class="k">from</span> simthinkd <span class="k">import</span> Decider
 
-        // Set example
-        if (weightsMetadata.example) {
-          document.getElementById("situation").value = weightsMetadata.example;
-        }
+d = Decider(<span class="s">"doom-defend"</span>)
+print(d.decide(<span class="s">"seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25"</span>))
+<span class="c"># TURN_LEFT (100%, 1.1 ms)</span>
 
-        return true;
-      } catch (e) {
-        console.error("Failed to load preset:", e);
-        showStatus(`Error loading ${presetName}: ${e.message}`, "error");
-        return false;
-      }
-    }
+<span class="c"># train your own from rules, on a CPU</span>
+<span class="k">import</span> simthinkd
+<span class="k">from</span> simthinkd <span class="k">import</span> toy
+d = simthinkd.fit(toy.examples(<span class="s">3000</span>), toy.ACTIONS, goal=toy.GOAL, out=<span class="s">"inspection"</span>)</pre>
+    <div class="ctas" style="margin-top:24px">
+      <a class="btn primary" href="https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb">Open in Colab</a>
+      <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd#readme">Read the README</a>
+    </div>
+  </div>
+</section>
 
-    function updateControls(controls) {
-      const container = document.getElementById("controls-grid");
-      container.innerHTML = "";
-      for (const ctrl of controls) {
-        const div = document.createElement("div");
-        div.className = "control-input";
+<section id="paper">
+  <div class="wrap">
+    <div class="kicker">Paper</div>
+    <h2>Decision time and decision quality, measured apart.</h2>
+    <div class="paper">
+      <p>Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator</p>
+      <p class="meta">Shin, Lee, Jeong and Kwon · preprint</p>
+    </div>
+    <div class="doi">
+      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23111659">Paper preprint (DOI)</a>
+      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23111615">Software (DOI)</a>
+      <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd/blob/main/docs/REPRODUCE.md">What you can reproduce</a>
+    </div>
+  </div>
+</section>
 
-        const label = document.createElement("label");
-        label.textContent = ctrl.label;
-        label.htmlFor = `ctrl-${ctrl.name}`;
-        div.appendChild(label);
+<footer>
+  <div class="wrap">
+    <span class="foot-brand"><img src="media/mssj_logo.png" alt="MSSJ (Myeongseongsimjae)"> SimThink D · Apache 2.0 · Myeongseongsimjae AX Institute</span>
+    <span><a href="https://github.com/MSSJ-AI-ORG/simthinkd/discussions">Questions and ideas: GitHub Discussions</a></span>
+  </div>
+</footer>
 
-        if (ctrl.type === "select") {
-          const select = document.createElement("select");
-          select.id = `ctrl-${ctrl.name}`;
-          select.onchange = updateSituationFromControls;
-          for (const opt of ctrl.options) {
-            const option = document.createElement("option");
-            option.value = opt;
-            option.textContent = opt;
-            if (opt === ctrl.default) option.selected = true;
-            select.appendChild(option);
-          }
-          div.appendChild(select);
-        } else if (ctrl.type === "range") {
-          const input = document.createElement("input");
-          input.type = "range";
-          input.id = `ctrl-${ctrl.name}`;
-          input.min = ctrl.min;
-          input.max = ctrl.max;
-          input.step = ctrl.step;
-          input.value = ctrl.default;
-          input.onchange = updateSituationFromControls;
-          input.oninput = updateSituationFromControls;
-          div.appendChild(input);
-
-          const value = document.createElement("span");
-          value.style.fontSize = "12px";
-          value.textContent = ctrl.default;
-          value.id = `val-${ctrl.name}`;
-          div.appendChild(value);
-        }
-
-        container.appendChild(div);
-      }
-    }
-
-    function updateSituationFromControls() {
-      const preset = document.getElementById("preset").value;
-      const config = presetConfigs[preset];
-
-      if (preset === "doom-defend") {
-        const enemy = document.getElementById("ctrl-enemy")?.value || "Demon";
-        const side = document.getElementById("ctrl-side")?.value || "left";
-        const angle = document.getElementById("ctrl-angle")?.value || "30";
-        const distance = document.getElementById("ctrl-distance")?.value || "5";
-        const enemies = document.getElementById("ctrl-enemies")?.value || "1";
-        const sway = document.getElementById("ctrl-sway")?.value || "left";
-        const gun = document.getElementById("ctrl-gun")?.value || "ready";
-        const ammo = document.getElementById("ctrl-ammo")?.value || "25";
-
-        document.getElementById("val-angle").textContent = angle;
-        document.getElementById("val-distance").textContent = distance;
-        document.getElementById("val-enemies").textContent = enemies;
-        document.getElementById("val-ammo").textContent = ammo;
-
-        const text = enemy === "no enemy"
-          ? `seen: no enemy visible | enemies 0 | sway ${sway} | gun ${gun} | ammo${ammo}`
-          : `seen: ${enemy} ${side} a${angle} d${distance} | enemies ${enemies} | sway ${sway} | gun ${gun} | ammo${ammo}`;
-        document.getElementById("situation").value = text;
-      } else if (preset === "doom-corridor") {
-        const v = (n) => document.getElementById(`ctrl-${n}`).value;
-        document.getElementById("val-offset").textContent = v("offset");
-        const enemy = v("enemy") === "no enemy" ? "no enemy visible" : `${v("enemy")} ${v("side")} ${v("range")} offset${v("offset")}`;
-        const armor = v("armor") === "not visible" ? "armor not visible" : `armor ${v("armor")}`;
-        document.getElementById("situation").value =
-          `enemies: ${enemy} | goal: ${armor} | body ${v("body")} | ammo ${v("ammo")}`;
-      }
-      onDecide();
-    }
-
-    function showStatus(msg, type) {
-      const el = document.getElementById("status");
-      el.textContent = msg;
-      el.className = `status ${type}`;
-    }
-
-    async function onDecide() {
-      const text = document.getElementById("situation").value.trim();
-      if (!text) {
-        showStatus("Please enter a situation", "error");
-        return;
-      }
-
-      showStatus("Inferring...", "loading");
-
-      // Measure timing
-      const times = [];
-      for (let i = 0; i < 50; i++) {
-        const start = performance.now();
-        const result = policy.decide(text);
-        const ms = performance.now() - start;
-        times.push(ms);
-      }
-
-      times.sort((a, b) => a - b);
-      const median = times[Math.floor(times.length / 2)];
-      const result = policy.decide(text);
-
-      showStatus("", "");
-
-      // Display result
-      document.getElementById("result-container").style.display = "block";
-      document.getElementById("no-result").style.display = "none";
-
-      document.getElementById("choice").textContent = result.choice;
-      document.getElementById("confidence").textContent =
-        `${(result.confidence * 100).toFixed(1)}% confidence`;
-
-      // Probabilities
-      const probsHtml = Object.entries(result.probabilities)
-        .sort((a, b) => b[1] - a[1])
-        .map(([op, prob]) => {
-          const pct = (prob * 100).toFixed(1);
-          return `
-        <div class="prob-row">
-          <div class="prob-label">${op}</div>
-          <div class="prob-bar-container">
-            <div class="prob-bar" style="width: ${pct}%"></div>
-          </div>
-          <div class="prob-value">${pct}%</div>
-        </div>
-      `;
-        })
-        .join("");
-      document.getElementById("probs-container").innerHTML = probsHtml;
-
-      // Timing
-      document.getElementById("timing-median").textContent = `${median.toFixed(2)} ms`;
-      document.getElementById("timing-fits").textContent =
-        median < 28.6 ? "✓ Yes" : "✗ No";
-      document.getElementById("weights-sha").textContent = weightsMetadata.sha256.slice(0, 16) + "...";
-    }
-
-    async function onPresetChange() {
-      const preset = document.getElementById("preset").value;
-      showStatus("Loading preset...", "loading");
-      if (await loadPreset(preset)) {
-        document.getElementById("controls").style.display = "block";
-        updateSituationFromControls();
-        showStatus("", "");
-      }
-    }
-
-    // Initialize
-    (async () => {
-      if (await loadPreset("doom-defend")) {
-        document.getElementById("controls").style.display = "block";
-        updateSituationFromControls();
-        showStatus("", "");
-      }
-    })();
-
-    // Inline onclick/onchange handlers need globals (module scope is private).
-    window.onDecide = onDecide;
-    window.onPresetChange = onPresetChange;
-    window.policy = () => policy;
-  </script>
+<script>
+document.getElementById("copy").addEventListener("click", function () {
+  var b = this;
+  navigator.clipboard.writeText(document.getElementById("pip").textContent).then(function () {
+    b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500);
+  }).catch(function () { b.textContent = "Select and copy"; });
+});
+(function () {
+  var f = document.getElementById("demoframe");
+  function fit() {
+    try { var c = f.contentDocument.querySelector(".container") || f.contentDocument.body; var h = Math.ceil(c.getBoundingClientRect().height); if (h > 200) f.style.height = (h + 8) + "px"; } catch (e) { /* keep the CSS height */ }
+  }
+  f.addEventListener("load", function () { fit(); setInterval(fit, 700); });
+})();
+</script>
 </body>
 </html>

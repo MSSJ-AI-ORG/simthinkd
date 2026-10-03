@@ -9,6 +9,8 @@
   <a href="https://doi.org/10.5281/zenodo.23111615"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23111615.svg" alt="DOI"></a>
 </p>
 
+<p align="center"><a href="https://mssj-ai-org.github.io/simthinkd/"><b>Project page, live demo and video →</b></a></p>
+
 **A tiny decision model that runs on one CPU core.** It has 265,665 parameters. It picks one action in about 2 ms. That is fast enough to decide inside every tick of a game or a control loop. No GPU is needed, not even for training.
 
 <p align="center">
@@ -19,7 +21,7 @@
 
 <div align="center">
 
-[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](https://mssj-ai-org.github.io/simthinkd/) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Reproduce the paper](docs/REPRODUCE.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
+[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](https://mssj-ai-org.github.io/simthinkd/#demo) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Reproduce the paper](docs/REPRODUCE.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
 
 </div>
 
