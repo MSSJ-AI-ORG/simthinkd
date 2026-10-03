@@ -1,0 +1,7 @@
+{
+  "mode": "numbers",
+  "negative_control": "planted number rejected",
+  "rows": [],
+  "unsupported": 0,
+  "verdict": "pass"
+}

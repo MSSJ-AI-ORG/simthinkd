@@ -139,6 +139,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <a class="by" href="https://mssj.ai" aria-label="by MSSJ (Myeongseongsimjae)"><span>by</span><img src="media/mssj_logo.png" alt="MSSJ (Myeongseongsimjae)"></a>
     <div class="links">
       <a href="#demo">Demo</a>
+      <a class="hide-sm" href="#fit">Where it fits</a>
       <a class="hide-sm" href="#factory">Factory</a>
       <a class="hide-sm" href="#paper">Paper</a>
       <a href="https://github.com/MSSJ-AI-ORG/simthinkd">GitHub</a>
@@ -149,7 +150,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <header class="hero">
   <div class="wrap">
     <div class="hero-text">
-      <a class="pill" href="https://pypi.org/project/simthinkd/">v0.1.0 · open source, Apache 2.0</a>
+      <a class="pill" href="https://pypi.org/project/simthinkd/">v0.2.0 · open source, Apache 2.0</a>
       <h1>A <em>tiny</em> decision model that keeps up with real time.</h1>
       <p class="sub">It reads one short sentence about the situation and picks an action in about 2 ms on one CPU core.
         <strong>No GPU, not even for training.</strong></p>
@@ -226,6 +227,22 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="card"><h3>Plugs into your stack</h3><p>An HTTP server, an MCP server and a LangChain tool come with the package.</p></div>
       <div class="card"><h3>Measure your own model</h3><p><code>simthinkd bench</code> replays 1,050 recorded Doom states and tells you if a decider answers within one tick.</p></div>
       <div class="card"><h3>Checkable</h3><p>The two bundled deciders are the ones evaluated in the paper. Their SHA-256 hashes are listed so you can check.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="fit">
+  <div class="wrap">
+    <div class="kicker">Where it fits</div>
+    <h2>Best as one part of a bigger system.</h2>
+    <p class="lead">Use it when the situation fits in one short line, the answer is small (one of up to 8 actions, or one number), and the answer has to be fast, cheap or offline.</p>
+    <div class="cards">
+      <div class="card"><h3>First filter</h3><p>SimThink D answers every case first. Only the cases it is not sure about go to a large model or a person.</p></div>
+      <div class="card"><h3>Local backup</h3><p>A cloud model answers first. When it is late or the network fails, SimThink D on the local machine answers instead.</p></div>
+      <div class="card"><h3>Game characters</h3><p>Moment-to-moment moves on every tick from SimThink D. Rare planning or dialogue from a large model.</p></div>
+      <div class="card"><h3>Risk or priority score</h3><p><code>fit_score</code> returns one number per item, in well under a millisecond. See <code>examples/risk_score.py</code>.</p></div>
+      <div class="card"><h3>A rule you already have</h3><p>It learns your rule from examples, then runs it in about 2 ms with no network.</p></div>
+      <div class="card"><h3>Not a fit</h3><p>Judging long text, answers that depend on history the line does not contain, and open-ended writing.</p></div>
     </div>
   </div>
 </section>

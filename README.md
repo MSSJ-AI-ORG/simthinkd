@@ -79,6 +79,65 @@ print(d.decide("part: defect dent | severity severe | image clear | belt normal 
 
 On our test PC this trains on the CPU in about 8 seconds. The new decider then matched the teacher on 500 of 500 states it had not seen.
 
+## Score instead of choose
+
+Sometimes you need a number, not an action: a risk level, a priority, an expected wait. `fit_score` trains the same small network to return one number. Give it (situation sentence, number) pairs.
+
+```python
+import random
+import simthinkd
+from simthinkd import toy
+
+SEVERITY = {"minor": 20, "moderate": 45, "severe": 75}
+
+def risk(s):  # your own rule or records give the number
+    value = 0 if s["defect"] == "none" else SEVERITY[s["severity"]]
+    value += 10 if s["image"] == "blurry" else 0
+    value += 8 if s["belt"] == "fast" else 0
+    value += 5 if s["defect"] != "none" and s["queue"] == "long" else 0
+    return float(min(100, value))
+
+rng = random.Random(7)
+examples = [(text, risk(state)) for state, text in (toy.observe(rng) for _ in range(3000))]
+s = simthinkd.fit_score(examples, goal="Rate how risky this part is, 0 to 100.", out="risk", low=0, high=100, quiet=True)
+print(s.score("part: defect dent | severity severe | image clear | belt fast | rework queue long"))
+# 87.99 (0.22 ms)
+```
+
+The full script is [examples/risk_score.py](examples/risk_score.py). On our test PC, a risk score trained this way was off by 0.13 points on average (on a 0 to 100 scale) for 400 parts it had not seen. It put every pair of parts in the right order.
+
+## Where it fits
+
+SimThink D is a good fit when all three are true:
+
+1. **The situation fits in one short line.** A few fields, like "seen: Demon left a30 d5 | enemies 1". Not a long text.
+2. **The answer is small.** One of up to 8 actions, or one number.
+3. **The answer must be fast, cheap or offline.** Every game tick, every part on a line, every control step, or when the network is down.
+
+| Use | Why it fits | Try it here |
+|---|---|---|
+| Game characters | One decision every tick, 35 ticks a second | The two Doom deciders, `simthinkd bench` |
+| Backup decider on a factory PC | Decides when a cloud service is late or offline | [examples/factory_twin](examples/factory_twin/) |
+| Risk or priority score | One number per item, in well under a millisecond | [examples/risk_score.py](examples/risk_score.py) |
+| A rule you already have | Learns your rule from examples, then runs it in about 2 ms | [Train your own](#train-your-own-in-seconds) |
+
+### Use it together with a large model
+
+Most of the time SimThink D works best as one part of a bigger system, not alone. Two patterns:
+
+| Pattern | How it works | Try it here |
+|---|---|---|
+| **First filter** | SimThink D answers every case first. When it is not sure (its confidence is below a threshold you set), the case goes to a large model or a person. Easy cases stay cheap and fast; hard cases still get the big model. | `python examples/factory_twin/run.py --arm CASCADE --tau 0.9` |
+| **Local backup** | A large model or cloud service answers first. When its answer is late or the network fails, SimThink D on the local machine answers instead. | The factory video above and [examples/factory_twin](examples/factory_twin/) |
+
+A game character (NPC) is a natural first-filter case: SimThink D handles the moment-to-moment moves on every tick, and a large model is asked only for rare, slower choices such as planning or dialogue.
+
+It is not a good fit for:
+
+- **Judging long text** such as essays or reports. In our own test on essay sections, a simple word-count model did better.
+- **Answers that are not in the line you give it.** If the answer depends on history the line does not contain, add that history to the line or use a different tool.
+- **Open-ended answers.** It picks from a list or returns one number. It does not write.
+
 ## Measure your own model
 
 Does your model fit inside one tick? `simthinkd bench` replays 1,050 recorded Doom states that ship with the package. It times every decision, one request at a time.
@@ -127,6 +186,7 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 - Text input only. Turn numbers into short words or bins, like "d5" or "ammo25".
 - A decider copies its teacher. It is only as good as the teacher's rules.
 - Probabilities are calibrated for the decider's own task only.
+- A score model returns one number. It gives no probability or error bar with it.
 
 ## Citation
 
