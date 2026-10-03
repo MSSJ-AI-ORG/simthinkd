@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/banner.png" alt="SimThink D: a tiny decision model that runs on one CPU core" width="100%"></p>
+<p align="center"><img src="assets/banner_v2.png" alt="SimThink D: a local backup for cloud decisions" width="100%"></p>
 
 <p align="center">
   <a href="https://pypi.org/project/simthinkd/"><img src="https://img.shields.io/pypi/v/simthinkd" alt="PyPI"></a>
@@ -9,27 +9,23 @@
   <a href="https://doi.org/10.5281/zenodo.23111615"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23111615.svg" alt="DOI"></a>
 </p>
 
-<p align="center"><a href="https://mssj-ai-org.github.io/simthinkd/"><b>Project page, live demo and video →</b></a></p>
+<p align="center"><b>Network down. Decisions stay local.</b></p>
 
-**A tiny decision model that runs on one CPU core.** It has 265,665 parameters. It picks one action in about 2 ms. That is fast enough to decide inside every tick of a game or a control loop. No GPU is needed, not even for training.
+SimThink D is a small CPU model for offline backup decisions.
+It has 265,665 parameters and takes about 2 ms per decision on one CPU core.
 
-<p align="center">
-  <img src="assets/side_by_side.gif" alt="Same Doom game, same seed, same CPU. Left: SimThink D answers every tick. Right: a 421M-parameter general decision model, used as published, misses most ticks while it thinks." width="100%" />
-</p>
+In the factory simulation, the internet was cut for 15 seconds.
+The local backup got 59 of 63 parts right, with no late decisions.
 
-<p align="center"><sub>Same game, same seed, same 6-core CPU. Left: SimThink D, 1.9 ms per decision, 1 of 420 ticks missed. Right: Laya, a 421M-parameter open decision model, used as published without training on this game. It takes about 360 ms per decision and misses 390 of 420 ticks. A dark frame means the game moved on before the decider answered.</sub></p>
+<p align="center"><a href="assets/factory_fallback.mp4"><img src="assets/factory_fallback_poster.jpg" alt="Watch the factory simulation: local backup during a network outage" width="100%"></a></p>
 
-<div align="center">
+<p align="center"><a href="https://mssj-ai-org.github.io/simthinkd/#demo">Try in your browser</a> · <a href="assets/factory_fallback.mp4">Watch the video (72 s)</a> · <a href="examples/factory_twin/">Factory code</a> · <a href="docs/PAPER.md">Paper</a></p>
 
-[Open in Colab](https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb) · [Try it in your browser](https://mssj-ai-org.github.io/simthinkd/#demo) · [Gradio demo](space/) · [Factory twin](examples/factory_twin/) · [Paper](docs/PAPER.md) · [Reproduce the paper](docs/REPRODUCE.md) · [Figures](docs/FIGURES.md) · [Protocol](docs/PROTOCOL.md)
+```bash
+pip install simthinkd
+```
 
-</div>
-
-### Video: the internet goes down, the line keeps going
-
-<a href="assets/factory_fallback.mp4"><img src="assets/factory_fallback_poster.jpg" alt="Internet down. The line kept going." width="100%"></a>
-
-A cloud decision service runs a simulated inspection line, with SimThink D on the factory PC as its backup. When an answer does not come back in time, or the network is cut, SimThink D makes the decision. [Watch the video](assets/factory_fallback.mp4) (72 s) or see it [on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7510142949981057024/). The simulator is in [examples/factory_twin](examples/factory_twin/).
+What makes the next decision when your network goes down?
 
 ## Words used here
 
@@ -151,6 +147,12 @@ The second line measures any server that accepts the [decision request](docs/PRO
 
 ## Same CPU, same states
 
+<p align="center">
+  <img src="assets/side_by_side.gif" alt="Same Doom game, same seed, same CPU. Left: SimThink D answers every tick. Right: a 421M-parameter general decision model, used as published, misses most ticks while it thinks." width="100%" />
+</p>
+
+<p align="center"><sub>Same game, same seed, same 6-core CPU. Left: SimThink D, 1.9 ms per decision, 1 of 420 ticks missed. Right: Laya, a 421M-parameter open decision model, used as published without training on this game. It takes about 360 ms per decision and misses 390 of 420 ticks. A dark frame means the game moved on before the decider answered.</sub></p>
+
 **Read this first.** Laya is a general model and was not trained on this game. Its published speed, about 33 ms per question, is on a GPU. We only had a CPU. So this table compares time inside a real-time loop. It does not compare overall quality.
 
 We used one workstation CPU (6 threads) and 1,050 Doom states, then 10 live games on the same seeds. "Missed ticks" are ticks that passed before the decider answered.
@@ -170,6 +172,7 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 | Unity / C# | [docs/INTEGRATION_UNITY.md](docs/INTEGRATION_UNITY.md): a client loop that keeps the game running while it waits |
 | Browser | [web/](web/): the same model in plain JavaScript, no server |
 | A factory line (simulator) | [examples/factory_twin/](examples/factory_twin/): an inspection conveyor with a 400 ms deadline per part |
+| Gradio | [space/](space/): a small web demo you can run locally or on Hugging Face Spaces |
 | MCP (Claude Desktop, Cursor and others) | `pip install "simthinkd[mcp]"`, then `python -m simthinkd.integrations.mcp_server` |
 | LangChain / LangGraph | `from simthinkd.integrations.langchain_tool import simthinkd_tool` |
 
@@ -187,6 +190,13 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 - A decider copies its teacher. It is only as good as the teacher's rules.
 - Probabilities are calibrated for the decider's own task only.
 - A score model returns one number. It gives no probability or error bar with it.
+
+## More
+
+- [Figures from the paper](docs/FIGURES.md)
+- [What you can reproduce](docs/REPRODUCE.md)
+- [Decision request format](docs/PROTOCOL.md)
+- [The factory video on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7510142949981057024/)
 
 ## Citation
 
