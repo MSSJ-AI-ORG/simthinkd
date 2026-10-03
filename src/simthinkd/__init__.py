@@ -6,7 +6,7 @@
 from .core import Decider, Decision, available, build_request
 from .score import Score, Scorer
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 __all__ = ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__']
 
 

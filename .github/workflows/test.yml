@@ -24,3 +24,5 @@ jobs:
         run: python -X utf8 tests/test_factory_twin.py
       - name: Score model
         run: python -X utf8 tests/test_score.py
+      - name: Server latency (keep-alive)
+        run: python -X utf8 tests/test_server_latency.py

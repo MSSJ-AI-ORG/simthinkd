@@ -4,7 +4,7 @@ title: "SimThink D: a tiny decision model for real-time loops"
 type: software
 authors:
   - name: "Myeongseongsimjae AX Institute"
-version: 0.2.0
+version: 0.2.1
 date-released: "2026-10-03"
 license: Apache-2.0
 doi: 10.5281/zenodo.23111615

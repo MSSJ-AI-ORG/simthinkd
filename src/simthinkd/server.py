@@ -5,6 +5,7 @@
 Binds to 127.0.0.1 by default. `--delay-ms` adds a fixed wait after inference (latency-injection experiments).
 """
 import json
+import socket
 import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -52,9 +53,23 @@ def make_handler(decider, name, delay_ms):
     return Handler
 
 
+class NoDelayHTTPServer(ThreadingHTTPServer):
+    """Turns off Nagle's algorithm on every connection.
+
+    The handler writes the headers and the body separately. On a kept-alive connection the second small write waits
+    for the client's delayed ACK, so every answer took about 40 ms (measured 2026-10-03: median 42 ms kept-alive vs
+    1.4 ms with TCP_NODELAY). Clients that reuse connections (Java HttpURLConnection does) missed 30 ms deadlines.
+    """
+
+    def get_request(self):
+        sock, addr = super().get_request()
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        return sock, addr
+
+
 def serve(decider='doom-defend', host='127.0.0.1', port=11890, delay_ms=0.0, name=None):
     decider = decider if isinstance(decider, Decider) else Decider(decider)
     name = name or f'simthink-d:{decider.preset["name"]}'
-    server = ThreadingHTTPServer((host, port), make_handler(decider, name, delay_ms))
+    server = NoDelayHTTPServer((host, port), make_handler(decider, name, delay_ms))
     print(json.dumps({'listening': f'{host}:{port}', 'weights_sha256': decider.sha256, 'model': name}), flush=True)
     server.serve_forever()
