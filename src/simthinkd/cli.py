@@ -23,6 +23,7 @@ def main(argv=None):
     s.add_argument('--states')
     s.add_argument('--tick-hz', type=float, default=35.0)
     s.add_argument('--limit', type=int, default=0)
+    s.add_argument('--batch', action='store_true', help='decisions per second, one at a time vs batches of 1, 10, 100, 1000')
     s.add_argument('--json', action='store_true')
     s = sub.add_parser('train', help='train from a folder of protocol rows (needs simthinkd[train])')
     s.add_argument('--data', required=True)
@@ -46,8 +47,12 @@ def main(argv=None):
         serve(a.decider, a.host, a.port, a.delay_ms)
     elif a.cmd == 'bench':
         from . import bench
-        result = bench.run(a.states, a.url, a.decider, a.name, a.tick_hz, limit=a.limit)
-        print(json.dumps(result) if a.json else bench.report(result))
+        if a.batch:
+            result = bench.throughput(a.states, a.decider, limit=a.limit or 1000)
+            print(json.dumps(result) if a.json else bench.throughput_report(result))
+        else:
+            result = bench.run(a.states, a.url, a.decider, a.name, a.tick_hz, limit=a.limit)
+            print(json.dumps(result) if a.json else bench.report(result))
     elif a.cmd == 'train':
         from .train import fit_dir
         d = fit_dir(a.data, a.out, a.steps, a.seed)

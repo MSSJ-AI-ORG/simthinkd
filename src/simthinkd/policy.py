@@ -173,9 +173,31 @@ class Policy:
         return (z @ w['score.weight'].T + w['score.bias'])[:, 0]
 
     def predict(self, body):
-        x, groups, rows, operations = encode(body)
-        op, conditional, joint = distributions(self.scores(x), groups, self.temperature)
+        return self.decode(encode(body), self.scores)
+
+    def decode(self, encoded, scores):
+        x, groups, rows, operations = encoded
+        op, conditional, joint = distributions(scores if not callable(scores) else scores(x), groups, self.temperature)
         chosen_group = int(op.argmax())
         indices = np.flatnonzero(groups == chosen_group)
         chosen = rows[int(indices[conditional[chosen_group].argmax()])]
         return chosen, op, conditional, joint, rows, operations
+
+    def scores_batch(self, blocks):
+        """Scores for many encoded blocks in one padded pass. A block is the row matrix of one question;
+        context pooling (mean, max) stays inside its block, so blocks never influence each other."""
+        sizes = np.array([len(b) for b in blocks])
+        starts = np.concatenate([[0], np.cumsum(sizes)[:-1]])
+        w = self.w
+        # All rows of all blocks go through each layer as one matrix product; only the pooling is per block.
+        h = np.maximum(0, np.concatenate(blocks) @ w['local.weight'].T + w['local.bias'])
+        context = np.concatenate([np.add.reduceat(h, starts) / sizes[:, None].astype(h.dtype), np.maximum.reduceat(h, starts)], axis=1)
+        z = np.concatenate([h, np.repeat(context, sizes, axis=0)], axis=1)
+        z = np.maximum(0, z @ w['context.weight'].T + w['context.bias'])
+        s = (z @ w['score.weight'].T + w['score.bias'])[:, 0]
+        return np.split(s, np.cumsum(sizes)[:-1])
+
+    def predict_batch(self, bodies):
+        """predict() for many requests: encoding is per request, the network runs once over all of them."""
+        encoded = [encode(b) for b in bodies]
+        return [self.decode(e, s) for e, s in zip(encoded, self.scores_batch([e[0] for e in encoded]))]

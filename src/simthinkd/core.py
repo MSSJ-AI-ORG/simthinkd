@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .policy import Policy
+from .policy import Policy, encode
 
 WEIGHTS = Path(__file__).resolve().parent / 'weights'
 
@@ -76,7 +76,11 @@ def build_request(state, actions, goal, *, url='sim://custom', title='', model='
 
 def answer(policy, body):
     """Reply `answers` block for a protocol request (operation, and `<op>_target` when targets were offered)."""
-    chosen, op, conditional, joint, rows, operations = policy.predict(body)
+    return answer_from(policy.predict(body))
+
+
+def answer_from(predicted):
+    chosen, op, conditional, joint, rows, operations = predicted
     op_probs = {key: float(op[i]) for i, key in enumerate(operations)}
     top = max(op_probs, key=op_probs.get)
     answers = {'operation': {'choice': top, 'probabilities': op_probs, 'confidence': op_probs[top]}}
@@ -88,6 +92,44 @@ def answer(policy, body):
         best = max(probs, key=probs.get)
         answers[top.lower() + '_target'] = {'choice': best, 'probabilities': probs, 'confidence': probs[best]}
     return answers
+
+
+def _question_body(body, question):
+    """One general question as an operation-style request on the same state: each criterion becomes one row."""
+    kind, crit = question.get('type', 'choice'), question.get('criteria')
+    if kind == 'score':
+        levels = list(crit.values()) if isinstance(crit, dict) else list(crit or [])
+        if not 2 <= len(levels) <= 10:
+            raise ValueError('a score question needs 2 to 10 levels')
+        crit = {str(i + 1): level for i, level in enumerate(levels)}
+    elif kind == 'noul':
+        crit = crit or {'true': 'Yes.', 'false': 'No.'}
+        if set(crit) != {'true', 'false'}:
+            raise ValueError('a noul question has exactly the criteria true and false')
+    elif kind != 'choice' or not crit:
+        raise ValueError(f'question type must be choice, score or noul with criteria (got {kind!r})')
+    return {'state': body['state'],
+            'questions': {'operation': {'type': 'choice', 'criteria': crit, 'instructions': question.get('instructions', {})}}}
+
+
+def _general_answer(kind, predicted):
+    op, keys = predicted[1], predicted[5]
+    probs = {k: float(op[i]) for i, k in enumerate(keys)}
+    best = max(probs, key=probs.get)
+    if kind == 'noul':
+        return {'type': 'noul', 'noul': probs['true'], 'probabilities': probs}
+    if kind == 'score':
+        return {'type': 'score', 'score': int(best), 'probabilities': probs, 'confidence': probs[best]}
+    return {'type': 'choice', 'choice': best, 'probabilities': probs, 'confidence': probs[best]}
+
+
+def _jobs(body):
+    """(name, type) per block: the operation question with its `<op>_target` companions is one coupled block (name None);
+    every other question is its own block."""
+    qs = body.get('questions', {})
+    coupled = {'operation'} | {op.lower() + '_target' for op in qs.get('operation', {}).get('criteria', {})}
+    jobs = [(None, None)] if 'operation' in qs else []
+    return jobs + [(name, q.get('type', 'choice')) for name, q in qs.items() if name not in coupled]
 
 
 @dataclass(frozen=True)
@@ -140,6 +182,30 @@ class Decider:
     def predict(self, body):
         """Protocol-level call: request dict in, `answers` dict out (same as the HTTP server)."""
         return answer(self.policy, body)
+
+    def predict_batch(self, bodies):
+        """predict() for many requests at once; the network runs once over all of them."""
+        return [answer_from(p) for p in self.policy.predict_batch(bodies)]
+
+    def ask(self, body):
+        """Several questions about one situation in one call (choice, score, noul). See docs/PARALLEL.md."""
+        return self.ask_batch([body])[0]
+
+    def ask_batch(self, bodies):
+        """ask() for many requests; every question of every request goes through one padded network pass."""
+        jobs, encoded = [], []
+        for i, body in enumerate(bodies):
+            for name, kind in _jobs(body):
+                jobs.append((i, name, kind))
+                encoded.append(encode(body if name is None else _question_body(body, body['questions'][name])))
+        if not encoded:
+            raise ValueError('no question to answer')
+        out = [{'answers': {}, 'meta': {'questions': 0}} for _ in bodies]
+        for (i, name, kind), e, s in zip(jobs, encoded, self.policy.scores_batch([e[0] for e in encoded])):
+            predicted = self.policy.decode(e, s)
+            out[i]['answers'].update(answer_from(predicted) if name is None else {name: _general_answer(kind, predicted)})
+            out[i]['meta']['questions'] += 1
+        return out
 
     def decide(self, state, actions=None, goal=None, tick=0, recent_actions=None):
         """One decision for one situation sentence. Returns a Decision (choice, confidence, probabilities, ms)."""

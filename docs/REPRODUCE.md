@@ -2,6 +2,8 @@
 
 The paper: Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator". Preprint: [doi:10.5281/zenodo.23111659](https://doi.org/10.5281/zenodo.23111659).
 
+Software version: the paper links the software release v0.1.0 (git tag `v0.1.0`, software DOI [10.5281/zenodo.23111615](https://doi.org/10.5281/zenodo.23111615)). The weight files and the decision code (`policy.py`) are unchanged since v0.1.0, so `predict()` gives the same answers in later versions. Later versions add features (for example parallel questions and batches, see [PARALLEL.md](PARALLEL.md)). To rerun with the exact release: `pip install simthinkd==0.1.0`.
+
 ## The deciders are the paper's deciders
 
 The two weight files in this package are the original deciders evaluated in the paper (called O there). You can check the hashes yourself.
