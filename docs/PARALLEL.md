@@ -45,19 +45,23 @@ network as one matrix product. Only the pooling across candidates is done per qu
 - `ask` on a plain request gives the same answer as `predict`.
 - Adding other questions, including one with 40 options, does not change a question's answer.
 - Bad questions (a score with one level, a noul without true/false, an unknown type, a choice without options) are refused.
+- Requests whose target questions have different numbers of candidates batch correctly; an empty batch returns `[]`; a block with no rows is refused.
 
 ## Measure it: `simthinkd bench --batch`
 
-Decisions per second on the bundled Doom states, one at a time and in batches of 1, 10, 100 and 1000, and the share of time
-spent turning text into features. One run on a desktop CPU (numpy, 7 actions per decision):
+Decisions per second on the bundled Doom states: one at a time (`predict`) and in batches of 1, 10, 100 and 1000
+(`predict_batch`), both end to end. A separate pass shows where batch time goes. One run on a desktop CPU (numpy, 7 actions
+per decision, 1000 decisions, best of 3):
 
-| | decisions per second | network alone | time spent encoding text |
-|---|---|---|---|
-| one at a time (`predict`) | 865 | | |
-| batch 1 | 977 | 3,694 | 74% |
-| batch 100 | 1,078 | 6,404 | 83% |
-| batch 1000 | 1,097 | 6,489 | 83% |
+| | end to end, per second | network alone, per second | encoding text | network | building answers |
+|---|---|---|---|---|---|
+| one at a time | 1,004 | | | | |
+| batch 1 | 722 | 6,366 | 75% | 11% | 14% |
+| batch 100 | 787 | 31,320 | 83% | 2% | 14% |
+| batch 1000 | 709 | 33,488 | 85% | 2% | 13% |
 
-Batching makes the network itself about 1.7 times faster, but most of the time goes to turning text into features, which is
-still done one request at a time. Speeding up that step, for example by running it in several processes, is the next step
-for higher throughput. Your numbers will differ with your CPU.
+Read this plainly: batching makes the network itself about 5 times faster, but end to end a batch is not faster than one
+request at a time here, because about 85% of the time goes to turning text into features, which is still done one request
+at a time in Python. Batching pays off once encoding is fast (for example run in several processes, cached, or done before
+the batch), or when the network runs on a GPU while the CPU encodes the next batch. Your numbers will differ with your
+machine.

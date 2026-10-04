@@ -115,11 +115,70 @@ def test_bad_questions_are_refused(bad):
     raise AssertionError(f'bad question accepted: {bad}')
 
 
+def target_body(n, seed):
+    """An operation request with an ATTACK target question of n enemies and a WAIT operation without targets."""
+    enemies = {f'e{i}': {'element': f'[enemy] e{i}', 'description': f'Zergling dist {10 + 7 * ((i + seed) % 9)} hp {20 + 5 * i}'}
+               for i in range(n)}
+    return {'state': {'page': {'url': 'sim://custom', 'title': '', 'text': f'me: Marine | enemies {n}'}, 'elements': [], 'recent_actions': []},
+            'questions': {'operation': {'type': 'choice', 'instructions': {'goal': 'Win the fight.'},
+                                        'criteria': {'ATTACK': 'Attack one enemy.', 'WAIT': 'Hold position.'}},
+                          'attack_target': {'type': 'choice', 'criteria': enemies}}}
+
+
+def test_targets_with_unequal_counts_route_and_batch_correctly():
+    d = Decider('doom-defend')
+    xs = [target_body(n, s) for s in range(3) for n in (1, 2, 5, 9, 17)]
+    singles = [d.predict(b) for b in xs]
+    for single, batched, asked in zip(singles, d.predict_batch(xs), d.ask_batch(xs)):
+        assert_same(single, batched)
+        assert_same(single, asked['answers'])
+
+
+def test_scores_batch_equals_scores_block_by_block():
+    from simthinkd.policy import encode
+    d = Decider('doom-defend')
+    blocks = [encode(b)[0] for b in bodies(20)] + [encode(target_body(9, 1))[0]]
+    blocks += [blocks[0][:1], blocks[-1][:3]]  # single-row and cut blocks, mixed sizes
+    for block, s in zip(blocks, d.policy.scores_batch(blocks)):
+        single = d.policy.scores(block)
+        assert s.dtype == single.dtype and s.shape == single.shape
+        # raw scores are float32 logits: compare relative to their size (probabilities are checked at 1e-6 elsewhere)
+        assert all(abs(float(a) - float(b)) <= 1e-5 * max(1.0, abs(float(b))) for a, b in zip(s, single))
+
+
+def test_empty_inputs():
+    d = Decider('doom-defend')
+    assert d.predict_batch([]) == [] and d.ask_batch([]) == [] and d.policy.scores_batch([]) == []
+    assert len(d.ask_batch(iter(bodies(2)))) == 2  # any iterable, read once
+    from simthinkd.policy import encode
+    x = encode(bodies(1)[0])[0]
+    for blocks in ([x, x[:0]], [x[:0], x]):
+        try:
+            d.policy.scores_batch(blocks)
+        except ValueError:
+            continue
+        raise AssertionError('an empty block was accepted')
+
+
+def test_score_and_noul_values_match_their_probabilities_in_batches():
+    d = Decider('doom-defend')
+    xs = [with_question(with_question(b, 'urgency', URGENCY), 'reload', RELOAD) for b in bodies(40)]
+    for one, many in zip([d.ask(b) for b in xs], d.ask_batch(xs)):
+        for a in (one['answers'], many['answers']):
+            u, r = a['urgency'], a['reload']
+            assert u['score'] == int(max(u['probabilities'], key=u['probabilities'].get))
+            assert r['noul'] == r['probabilities']['true']
+        assert one['answers']['urgency']['score'] == many['answers']['urgency']['score']
+        assert abs(one['answers']['reload']['noul'] - many['answers']['reload']['noul']) <= TOL
+
+
 if __name__ == '__main__':  # CI runs test files as scripts
     cases = [(test_predict_batch_equals_one_at_a_time, p) for p in ('doom-defend', 'doom-corridor')]
     cases += [(f, None) for f in (test_ask_on_a_plain_request_equals_predict, test_extra_questions_do_not_change_the_operation_answer,
                                   test_questions_stay_independent_of_each_other, test_score_and_noul_answers_have_their_shape,
-                                  test_ask_batch_equals_ask, test_question_only_request_without_operation)]
+                                  test_ask_batch_equals_ask, test_question_only_request_without_operation,
+                                  test_targets_with_unequal_counts_route_and_batch_correctly, test_scores_batch_equals_scores_block_by_block,
+                                  test_empty_inputs, test_score_and_noul_values_match_their_probabilities_in_batches)]
     for f, arg in cases:
         f(arg) if arg else f()
     for bad in [{'type': 'score', 'criteria': ['only one']}, {'type': 'noul', 'criteria': {'yes': 'a', 'no': 'b'}},

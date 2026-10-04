@@ -186,6 +186,10 @@ class Policy:
     def scores_batch(self, blocks):
         """Scores for many encoded blocks in one padded pass. A block is the row matrix of one question;
         context pooling (mean, max) stays inside its block, so blocks never influence each other."""
+        if not len(blocks):
+            return []
+        if any(len(b) == 0 for b in blocks):
+            raise ValueError('every block needs at least one row')
         sizes = np.array([len(b) for b in blocks])
         starts = np.concatenate([[0], np.cumsum(sizes)[:-1]])
         w = self.w
@@ -200,4 +204,6 @@ class Policy:
     def predict_batch(self, bodies):
         """predict() for many requests: encoding is per request, the network runs once over all of them."""
         encoded = [encode(b) for b in bodies]
+        if not encoded:
+            return []
         return [self.decode(e, s) for e, s in zip(encoded, self.scores_batch([e[0] for e in encoded]))]

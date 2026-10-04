@@ -50,43 +50,50 @@ def run(states=None, url=None, decider='doom-defend', name=None, tick_hz=35.0, w
 
 
 def throughput(states=None, decider='doom-defend', sizes=(1, 10, 100, 1000), limit=1000, repeat=3):
-    """Decisions per second, one request at a time vs batches (Decider.predict_batch), and where the time goes:
-    encoding (text to features, per request) vs the network (one padded pass per batch). In-process only."""
+    """Decisions per second, one request at a time (predict) vs batches (predict_batch), both end to end with the same
+    answers; then, in a separate instrumented pass, where batch time goes: encoding text (per request), the network
+    (Policy.scores_batch, one pass per batch) and turning scores into answers. In-process only; best of `repeat` runs."""
+    from .core import answer_from
     from .policy import encode
     d = decider if isinstance(decider, Decider) else Decider(decider)
     rows = json.loads(Path(states or BUNDLED).read_text(encoding='utf8'))['rows']
     bodies = [rows[i % len(rows)]['body'] for i in range(limit)]
     d.predict_batch(bodies[:20])
-    out = {'name': f'simthink-d:{d.preset["name"]}', 'decisions': len(bodies), 'sizes': {}}
-    start = time.perf_counter()
-    for body in bodies:
-        d.predict(body)
-    out['one_at_a_time_per_s'] = round(len(bodies) / (time.perf_counter() - start), 1)
-    for size in sizes:
-        best = None
+
+    def best(run):
+        times = []
         for _ in range(repeat):
-            enc_s = net_s = 0.0
-            for i in range(0, len(bodies), size):
-                chunk = bodies[i:i + size]
-                t0 = time.perf_counter()
-                encoded = [encode(b) for b in chunk]
-                t1 = time.perf_counter()
-                scores = d.policy.scores_batch([e[0] for e in encoded])
-                [d.policy.decode(e, s) for e, s in zip(encoded, scores)]
-                enc_s, net_s = enc_s + t1 - t0, net_s + time.perf_counter() - t1
-            if best is None or enc_s + net_s < best[0] + best[1]:
-                best = (enc_s, net_s)
-        enc_s, net_s = best
-        out['sizes'][size] = {'per_s': round(len(bodies) / (enc_s + net_s), 1), 'encode_share': round(enc_s / (enc_s + net_s), 3),
-                              'network_only_per_s': round(len(bodies) / net_s, 1)}
+            start = time.perf_counter()
+            run()
+            times.append(time.perf_counter() - start)
+        return min(times)
+
+    out = {'name': f'simthink-d:{d.preset["name"]}', 'decisions': len(bodies), 'sizes': {}}
+    out['one_at_a_time_per_s'] = round(len(bodies) / best(lambda: [d.predict(b) for b in bodies]), 1)
+    for size in sizes:
+        chunks = [bodies[i:i + size] for i in range(0, len(bodies), size)]
+        total = best(lambda: [d.predict_batch(c) for c in chunks])
+        enc = net = dec = 0.0
+        for c in chunks:
+            t0 = time.perf_counter()
+            encoded = [encode(b) for b in c]
+            t1 = time.perf_counter()
+            scores = d.policy.scores_batch([e[0] for e in encoded])
+            t2 = time.perf_counter()
+            [answer_from(d.policy.decode(e, sc)) for e, sc in zip(encoded, scores)]
+            enc, net, dec = enc + t1 - t0, net + t2 - t1, dec + time.perf_counter() - t2
+        part = enc + net + dec
+        out['sizes'][size] = {'per_s': round(len(bodies) / total, 1), 'network_only_per_s': round(len(bodies) / net, 1),
+                              'encode_share': round(enc / part, 3), 'network_share': round(net / part, 3),
+                              'answer_share': round(dec / part, 3)}
     return out
 
 
 def throughput_report(r):
     lines = [f"{r['name']}: {r['decisions']} decisions, one at a time {r['one_at_a_time_per_s']}/s"]
     for size, v in r['sizes'].items():
-        lines.append(f"  batch {size:>5}: {v['per_s']}/s overall, network alone {v['network_only_per_s']}/s, "
-                     f"{v['encode_share']:.0%} of the time spent encoding text")
+        lines.append(f"  batch {size:>5}: {v['per_s']}/s end to end; network alone {v['network_only_per_s']}/s; time: "
+                     f"{v['encode_share']:.0%} encoding text, {v['network_share']:.0%} network, {v['answer_share']:.0%} building answers")
     return '\n'.join(lines)
 
 

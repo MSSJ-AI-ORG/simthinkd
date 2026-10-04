@@ -193,6 +193,9 @@ class Decider:
 
     def ask_batch(self, bodies):
         """ask() for many requests; every question of every request goes through one padded network pass."""
+        bodies = list(bodies)
+        if not bodies:
+            return []
         jobs, encoded = [], []
         for i, body in enumerate(bodies):
             for name, kind in _jobs(body):
