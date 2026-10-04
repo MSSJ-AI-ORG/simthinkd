@@ -1,3 +1,5 @@
+<p align="center"><b>English</b> | <a href="README.ko.md">한국어</a> | <a href="README.ja.md">日本語</a></p>
+
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: a local backup for cloud decisions" width="100%"></p>
 
 <p align="center">
@@ -17,9 +19,9 @@ It has 265,665 parameters and takes about 2 ms per decision on one CPU core.
 In the factory simulation, the internet was cut for 15 seconds.
 The local backup got 59 of 63 parts right, with no late decisions.
 
-<p align="center"><a href="assets/factory_fallback.mp4"><img src="assets/factory_fallback_poster.jpg" alt="Watch the factory simulation: local backup during a network outage" width="100%"></a></p>
+<p align="center"><a href="assets/factory_fallback.mp4"><img src="assets/factory_twin.gif" alt="Factory simulation: the internet is cut for 15 seconds and SimThink D on the factory PC fills the gap" width="100%"></a></p>
 
-<p align="center"><a href="https://mssj-ai-org.github.io/simthinkd/#demo">Try in your browser</a> · <a href="assets/factory_fallback.mp4">Watch the video (72 s)</a> · <a href="examples/factory_twin/">Factory code</a> · <a href="docs/PAPER.md">Paper</a></p>
+<p align="center"><a href="https://mssj-ai-org.github.io/simthinkd/">Project page</a> · <a href="https://mssj-ai-org.github.io/simthinkd/#demo">Try in your browser</a> · <a href="assets/factory_fallback.mp4">Watch the video (72 s)</a> · <a href="examples/factory_twin/">Factory code</a> · <a href="docs/PAPER.md">Paper</a></p>
 
 ```bash
 pip install simthinkd

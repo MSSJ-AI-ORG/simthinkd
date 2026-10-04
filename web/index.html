@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SimThink D: a tiny decision model for real time</title>
-<meta name="description" content="SimThink D reads one short sentence about the situation and picks an action in about 2 ms on one CPU core. Open source, Apache 2.0.">
+<meta name="description" content="SimThink D reads one short sentence about the situation and picks an action in about 2&nbsp;ms on one CPU core. Open source, Apache 2.0.">
 <meta property="og:title" content="SimThink D: a tiny decision model for real time">
 <meta property="og:description" content="About 2 ms per decision on one CPU core. 265,665 parameters. Trains on a CPU in seconds.">
 <meta property="og:image" content="https://raw.githubusercontent.com/MSSJ-AI-ORG/simthinkd/main/assets/social_preview.png">
@@ -129,6 +129,22 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   .install { font-size: 15px; }
   .stat b { font-size: 38px; }
 }
+.lang { display: inline-flex; gap: 2px; margin-left: 8px; border: 1px solid var(--line); border-radius: 999px; padding: 2px; background: #fff; }
+.lang button { font: inherit; font-size: 13px; border: 0; background: transparent; color: var(--muted); padding: 4px 9px; border-radius: 999px; cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.lang button:focus-visible { outline: 2px solid var(--orange); outline-offset: 1px; }
+.lang .short { display: none; }
+.install { max-width: min(420px, 100%); } .install code { min-width: 0; overflow-x: auto; }
+.cards > *, .stats > * { min-width: 0; }
+.card p, .card h3, .lead, .note { overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .lang { margin-left: 4px; }
+  .lang button { padding: 4px 7px; }
+  .lang .long { display: none; } .lang .short { display: inline; }
+}
+@media (max-width: 480px) {
+  nav .links > a { display: none; } /* the hero already has the demo and GitHub buttons */
+}
 </style>
 </head>
 <body>
@@ -138,11 +154,12 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <a class="brand" href="#"><img src="media/simthink_mark.png" alt="">SimThink D</a>
     <a class="by" href="https://mssj.ai" aria-label="by MSSJ (Myeongseongsimjae)"><span>by</span><img src="media/mssj_logo.png" alt="MSSJ (Myeongseongsimjae)"></a>
     <div class="links">
-      <a href="#demo">Demo</a>
-      <a class="hide-sm" href="#fit">Where it fits</a>
-      <a class="hide-sm" href="#factory">Factory</a>
-      <a class="hide-sm" href="#paper">Paper</a>
+      <a href="#demo" data-i18n="nav.demo">Demo</a>
+      <a class="hide-sm" href="#fit" data-i18n="nav.fit">Where it fits</a>
+      <a class="hide-sm" href="#factory" data-i18n="nav.factory">Factory</a>
+      <a class="hide-sm" href="#paper" data-i18n="nav.paper">Paper</a>
       <a href="https://github.com/MSSJ-AI-ORG/simthinkd">GitHub</a>
+      <span class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" lang="en" aria-label="English">EN</button><button type="button" data-lang="ko" lang="ko" aria-label="한국어"><span class="long">한국어</span><span class="short">한</span></button><button type="button" data-lang="ja" lang="ja" aria-label="日本語"><span class="long">日本語</span><span class="short">日</span></button></span>
     </div>
   </div>
 </nav>
@@ -150,37 +167,37 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <header class="hero">
   <div class="wrap">
     <div class="hero-text">
-      <a class="pill" href="https://pypi.org/project/simthinkd/">v0.2.0 · open source, Apache 2.0</a>
-      <h1>A <em>tiny</em> decision model that keeps up with real time.</h1>
-      <p class="sub">It reads one short sentence about the situation and picks an action in about 2 ms on one CPU core.
+      <a class="pill" href="https://pypi.org/project/simthinkd/" data-i18n="hero.pill">v0.2.1 · open source, Apache 2.0</a>
+      <h1 data-i18n="hero.h1">A <em>tiny</em> decision model that keeps up with real time.</h1>
+      <p class="sub" data-i18n="hero.sub">It reads one short sentence about the situation and picks an action in about 2&nbsp;ms on one CPU core.
         <strong>No GPU, not even for training.</strong></p>
       <div class="install"><code id="pip">pip install simthinkd</code><button type="button" id="copy">Copy</button></div>
       <div class="ctas">
-        <a class="btn primary" href="#demo">Try it in your browser</a>
+        <a class="btn primary" href="#demo" data-i18n="hero.try">Try it in your browser</a>
         <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd">GitHub</a>
       </div>
-      <a class="next" href="https://github.com/MSSJ-AI-ORG/simthinkd#quickstart">Then follow the quickstart →</a>
+      <a class="next" href="https://github.com/MSSJ-AI-ORG/simthinkd#quickstart" data-i18n="hero.next">Then follow the quickstart →</a>
     </div>
   </div>
 </header>
 
 <section id="timing">
   <div class="wrap">
-    <div class="kicker">Fits inside the deadline</div>
-    <h2>Decide before the world moves on.</h2>
-    <p class="lead">A game or a machine does not wait. Each bar is the time you have. The orange part is the time SimThink D used.</p>
+    <div class="kicker" data-i18n="timing.kicker">Fits inside the deadline</div>
+    <h2 data-i18n="timing.h2">Decide before the world moves on.</h2>
+    <p class="lead" data-i18n="timing.lead">A game or a machine does not wait. Each bar is the time you have. The orange part is the time SimThink D used.</p>
     <div class="timing">
       <div class="row">
-        <div class="label"><span><b>Doom</b>, one tick at 35 ticks per second</span><span>1.9 ms of 28.6 ms</span></div>
+        <div class="label"><span data-i18n="timing.row1"><b>Doom</b>, one tick at 35 ticks per second</span><span data-i18n="timing.row1v">1.9 ms of 28.6 ms</span></div>
         <div class="bar"><span style="width:6.64%"></span><i>28.6 ms</i></div>
       </div>
       <div class="row">
-        <div class="label"><span><b>Inspection conveyor</b>, before the part reaches the diverter</span><span>20 ms of 400 ms</span></div>
+        <div class="label"><span data-i18n="timing.row2"><b>Inspection conveyor</b>, before the part reaches the diverter</span><span data-i18n="timing.row2v">20 ms of 400 ms</span></div>
         <div class="bar"><span style="width:5%"></span><i>400 ms</i></div>
       </div>
     </div>
-    <div class="legend"><span class="a">SimThink D decision time (median)</span><span class="b">time available</span></div>
-    <p class="note">Medians measured on our test PCs. In the conveyor run the decider is called over HTTP.
+    <div class="legend"><span class="a" data-i18n="timing.legendA">SimThink D decision time (median)</span><span class="b" data-i18n="timing.legendB">time available</span></div>
+    <p class="note" data-i18n="timing.note">Medians measured on our test PCs. In the conveyor run the decider is called over HTTP.
       Your numbers will differ, so measure them: <code>simthinkd bench</code> ·
       <a href="https://github.com/MSSJ-AI-ORG/simthinkd/blob/main/docs/REPRODUCE.md">reproduce</a></p>
   </div>
@@ -188,9 +205,9 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
 <section id="factory" class="soft">
   <div class="wrap">
-    <div class="kicker">On a simulated inspection line</div>
-    <h2>Internet down. The line kept going.</h2>
-    <p class="lead">A cloud service decides first. When its answer is not back in 0.33 seconds, SimThink D on the factory PC decides.
+    <div class="kicker" data-i18n="factory.kicker">On a simulated inspection line</div>
+    <h2 data-i18n="factory.h2">Internet down. The line kept going.</h2>
+    <p class="lead" data-i18n="factory.lead">A cloud service decides first. When its answer is not back in 0.33 seconds, SimThink D on the factory PC decides.
       Then we cut the network for 15 seconds.</p>
     <div class="media">
       <video controls preload="metadata" playsinline poster="media/factory_fallback_poster.jpg">
@@ -198,59 +215,59 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       </video>
     </div>
     <div class="stats">
-      <div class="stat"><b>59 / 63</b><span>parts right during the outage</span></div>
-      <div class="stat"><b>54% → 94.7%</b><span>parts handled correctly, whole run</span></div>
-      <div class="stat"><b>0</b><span>late decisions</span></div>
+      <div class="stat"><b>59 / 63</b><span data-i18n="factory.s1">parts right during the outage</span></div>
+      <div class="stat"><b>54% → 94.7%</b><span data-i18n="factory.s2">parts handled correctly, whole run</span></div>
+      <div class="stat"><b>0</b><span data-i18n="factory.s3">late decisions</span></div>
     </div>
-    <p class="note">A simulated line, and the decider learned this line's own rules, so it has a home advantage.
+    <p class="note" data-i18n="factory.note">A simulated line, and the decider learned this line's own rules, so it has a home advantage.
       The simulator is in <a href="https://github.com/MSSJ-AI-ORG/simthinkd/tree/main/examples/factory_twin">examples/factory_twin</a>.</p>
   </div>
 </section>
 
 <section id="demo">
   <div class="wrap">
-    <div class="kicker">Live demo</div>
-    <h2>Try it right here.</h2>
-    <p class="lead">The two Doom deciders from the paper run in this page, in plain JavaScript. Change the situation and press Decide.</p>
+    <div class="kicker" data-i18n="demo.kicker">Live demo</div>
+    <h2 data-i18n="demo.h2">Try it right here.</h2>
+    <p class="lead" data-i18n="demo.lead">The two Doom deciders from the paper run in this page, in plain JavaScript. Change the situation and press Decide.</p>
     <div class="demo"><iframe id="demoframe" src="demo/" title="SimThink D browser demo" loading="lazy"></iframe></div>
   </div>
 </section>
 
 <section id="features">
   <div class="wrap">
-    <div class="kicker">What you get</div>
-    <h2>Small, fast and easy to own.</h2>
+    <div class="kicker" data-i18n="features.kicker">What you get</div>
+    <h2 data-i18n="features.h2">Small, fast and easy to own.</h2>
     <div class="cards">
-      <div class="card"><h3>One CPU core</h3><p>About 2 ms per decision with 265,665 parameters. No GPU and no network needed.</p></div>
-      <div class="card"><h3>Train in seconds</h3><p>Write your rules as a normal function. The toy task in the README trains on a CPU in about 8 seconds.</p></div>
-      <div class="card"><h3>NumPy only</h3><p>Making decisions needs only NumPy. Training adds PyTorch, and the CPU build is fine.</p></div>
-      <div class="card"><h3>Plugs into your stack</h3><p>An HTTP server, an MCP server and a LangChain tool come with the package.</p></div>
-      <div class="card"><h3>Measure your own model</h3><p><code>simthinkd bench</code> replays 1,050 recorded Doom states and tells you if a decider answers within one tick.</p></div>
-      <div class="card"><h3>Checkable</h3><p>The two bundled deciders are the ones evaluated in the paper. Their SHA-256 hashes are listed so you can check.</p></div>
+      <div class="card"><h3 data-i18n="features.c1h">One CPU core</h3><p data-i18n="features.c1p">About 2 ms per decision with 265,665 parameters. No GPU and no network needed.</p></div>
+      <div class="card"><h3 data-i18n="features.c2h">Train in seconds</h3><p data-i18n="features.c2p">Write your rules as a normal function. The toy task in the README trains on a CPU in about 8 seconds.</p></div>
+      <div class="card"><h3 data-i18n="features.c3h">NumPy only</h3><p data-i18n="features.c3p">Making decisions needs only NumPy. Training adds PyTorch, and the CPU build is fine.</p></div>
+      <div class="card"><h3 data-i18n="features.c4h">Plugs into your stack</h3><p data-i18n="features.c4p">An HTTP server, an MCP server and a LangChain tool come with the package.</p></div>
+      <div class="card"><h3 data-i18n="features.c5h">Measure your own model</h3><p data-i18n="features.c5p"><code>simthinkd bench</code> replays 1,050 recorded Doom states and tells you if a decider answers within one tick.</p></div>
+      <div class="card"><h3 data-i18n="features.c6h">Checkable</h3><p data-i18n="features.c6p">The two bundled deciders are the ones evaluated in the paper. Their SHA-256 hashes are listed so you can check.</p></div>
     </div>
   </div>
 </section>
 
 <section id="fit">
   <div class="wrap">
-    <div class="kicker">Where it fits</div>
-    <h2>Best as one part of a bigger system.</h2>
-    <p class="lead">Use it when the situation fits in one short line, the answer is small (one of up to 8 actions, or one number), and the answer has to be fast, cheap or offline.</p>
+    <div class="kicker" data-i18n="fit.kicker">Where it fits</div>
+    <h2 data-i18n="fit.h2">Best as one part of a bigger system.</h2>
+    <p class="lead" data-i18n="fit.lead">Use it when the situation fits in one short line, the answer is small (one of up to 8 actions, or one number), and the answer has to be fast, cheap or offline.</p>
     <div class="cards">
-      <div class="card"><h3>First filter</h3><p>SimThink D answers every case first. Only the cases it is not sure about go to a large model or a person.</p></div>
-      <div class="card"><h3>Local backup</h3><p>A cloud model answers first. When it is late or the network fails, SimThink D on the local machine answers instead.</p></div>
-      <div class="card"><h3>Game characters</h3><p>Moment-to-moment moves on every tick from SimThink D. Rare planning or dialogue from a large model.</p></div>
-      <div class="card"><h3>Risk or priority score</h3><p><code>fit_score</code> returns one number per item, in well under a millisecond. See <code>examples/risk_score.py</code>.</p></div>
-      <div class="card"><h3>A rule you already have</h3><p>It learns your rule from examples, then runs it in about 2 ms with no network.</p></div>
-      <div class="card"><h3>Not a fit</h3><p>Judging long text, answers that depend on history the line does not contain, and open-ended writing.</p></div>
+      <div class="card"><h3 data-i18n="fit.c1h">First filter</h3><p data-i18n="fit.c1p">SimThink D answers every case first. Only the cases it is not sure about go to a large model or a person.</p></div>
+      <div class="card"><h3 data-i18n="fit.c2h">Local backup</h3><p data-i18n="fit.c2p">A cloud model answers first. When it is late or the network fails, SimThink D on the local machine answers instead.</p></div>
+      <div class="card"><h3 data-i18n="fit.c3h">Game characters</h3><p data-i18n="fit.c3p">Moment-to-moment moves on every tick from SimThink D. Rare planning or dialogue from a large model.</p></div>
+      <div class="card"><h3 data-i18n="fit.c4h">Risk or priority score</h3><p data-i18n="fit.c4p"><code>fit_score</code> returns one number per item, in well under a millisecond. See <code>examples/risk_score.py</code>.</p></div>
+      <div class="card"><h3 data-i18n="fit.c5h">A rule you already have</h3><p data-i18n="fit.c5p">It learns your rule from examples, then runs it in about 2 ms with no network.</p></div>
+      <div class="card"><h3 data-i18n="fit.c6h">Not a fit</h3><p data-i18n="fit.c6p">Judging long text, answers that depend on history the line does not contain, and open-ended writing.</p></div>
     </div>
   </div>
 </section>
 
 <section id="code" class="soft">
   <div class="wrap">
-    <div class="kicker">Quickstart</div>
-    <h2>One call is one decision.</h2>
+    <div class="kicker" data-i18n="code.kicker">Quickstart</div>
+    <h2 data-i18n="code.h2">One call is one decision.</h2>
 <pre class="code"><span class="k">from</span> simthinkd <span class="k">import</span> Decider
 
 d = Decider(<span class="s">"doom-defend"</span>)
@@ -262,24 +279,24 @@ print(d.decide(<span class="s">"seen: Demon left a30 d5 | enemies 1 | sway left 
 <span class="k">from</span> simthinkd <span class="k">import</span> toy
 d = simthinkd.fit(toy.examples(<span class="s">3000</span>), toy.ACTIONS, goal=toy.GOAL, out=<span class="s">"inspection"</span>)</pre>
     <div class="ctas" style="margin-top:24px">
-      <a class="btn primary" href="https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb">Open in Colab</a>
-      <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd#readme">Read the README</a>
+      <a class="btn primary" href="https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb" data-i18n="code.colab">Open in Colab</a>
+      <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd#readme" data-i18n="code.readme">Read the README</a>
     </div>
   </div>
 </section>
 
 <section id="paper">
   <div class="wrap">
-    <div class="kicker">Paper</div>
-    <h2>Decision time and decision quality, measured apart.</h2>
+    <div class="kicker" data-i18n="paper.kicker">Paper</div>
+    <h2 data-i18n="paper.h2">Decision time and decision quality, measured apart.</h2>
     <div class="paper">
       <p>Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator</p>
       <p class="meta">Shin, Lee, Jeong and Kwon · preprint</p>
     </div>
     <div class="doi">
-      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23111659">Paper preprint (DOI)</a>
-      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23111615">Software (DOI)</a>
-      <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd/blob/main/docs/REPRODUCE.md">What you can reproduce</a>
+      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23111659" data-i18n="paper.doi1">Paper preprint (DOI)</a>
+      <a class="btn ghost" href="https://doi.org/10.5281/zenodo.23111615" data-i18n="paper.doi2">Software (DOI)</a>
+      <a class="btn ghost" href="https://github.com/MSSJ-AI-ORG/simthinkd/blob/main/docs/REPRODUCE.md" data-i18n="paper.repro">What you can reproduce</a>
     </div>
   </div>
 </section>
@@ -287,16 +304,17 @@ d = simthinkd.fit(toy.examples(<span class="s">3000</span>), toy.ACTIONS, goal=t
 <footer>
   <div class="wrap">
     <span class="foot-brand"><img src="media/mssj_logo.png" alt="MSSJ (Myeongseongsimjae)"> SimThink D · Apache 2.0 · Myeongseongsimjae AX Institute</span>
-    <span><a href="https://github.com/MSSJ-AI-ORG/simthinkd/discussions">Questions and ideas: GitHub Discussions</a></span>
+    <span><a href="https://github.com/MSSJ-AI-ORG/simthinkd/discussions" data-i18n="footer.disc">Questions and ideas: GitHub Discussions</a></span>
   </div>
 </footer>
 
+<script src="i18n.js"></script>
 <script>
 document.getElementById("copy").addEventListener("click", function () {
   var b = this;
   navigator.clipboard.writeText(document.getElementById("pip").textContent).then(function () {
-    b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500);
-  }).catch(function () { b.textContent = "Select and copy"; });
+    b.textContent = window.simthinkdText("_copied"); setTimeout(function () { b.textContent = window.simthinkdText("_copy"); }, 1500);
+  }).catch(function () { b.textContent = window.simthinkdText("_copyfail"); });
 });
 (function () {
   var f = document.getElementById("demoframe");
