@@ -152,6 +152,13 @@ def test_empty_inputs():
     assert len(d.ask_batch(iter(bodies(2)))) == 2  # any iterable, read once
     from simthinkd.policy import encode
     x = encode(bodies(1)[0])[0]
+    empty = {'state': bodies(1)[0]['state'], 'questions': {}}
+    for batch in ([empty], [bodies(1)[0], empty], [empty, bodies(1)[0]]):  # refused alone and beside a valid request
+        try:
+            d.ask_batch(batch)
+        except ValueError:
+            continue
+        raise AssertionError('a request without questions was accepted')
     for blocks in ([x, x[:0]], [x[:0], x]):
         try:
             d.policy.scores_batch(blocks)

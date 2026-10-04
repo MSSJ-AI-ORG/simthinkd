@@ -198,11 +198,12 @@ class Decider:
             return []
         jobs, encoded = [], []
         for i, body in enumerate(bodies):
-            for name, kind in _jobs(body):
+            body_jobs = _jobs(body)
+            if not body_jobs:  # checked per request, so a neighbour in the batch never changes the outcome
+                raise ValueError(f'request {i} has no question to answer')
+            for name, kind in body_jobs:
                 jobs.append((i, name, kind))
                 encoded.append(encode(body if name is None else _question_body(body, body['questions'][name])))
-        if not encoded:
-            raise ValueError('no question to answer')
         out = [{'answers': {}, 'meta': {'questions': 0}} for _ in bodies]
         for (i, name, kind), e, s in zip(jobs, encoded, self.policy.scores_batch([e[0] for e in encoded])):
             predicted = self.policy.decode(e, s)
