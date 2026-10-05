@@ -62,6 +62,23 @@ One call is one decision. A short sentence goes in. One action comes out, with i
 
 Two deciders come with the package: `doom-defend` (stand in the middle and fight) and `doom-corridor` (fight your way down a corridor).
 
+## Many decisions at once
+
+One call can carry several questions about the same situation, and one batch can carry many situations. The answers are the same as asking one by one.
+
+```python
+from simthinkd import Decider
+
+d = Decider("doom-defend")
+states = ["seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25",
+          "seen: Demon right a30 d5 | enemies 1 | sway right | gun ready | ammo25"]
+answers = d.predict_batch([d.request(s) for s in states])   # many situations in one pass
+print([a["operation"]["choice"] for a in answers])
+# ['TURN_LEFT', 'TURN_RIGHT']
+```
+
+`simthinkd bench --batch` shows where the time goes on your machine. Details and limits: [docs/PARALLEL.md](docs/PARALLEL.md).
+
 ## Train your own in seconds
 
 A new task needs two things: a perception step and a teacher. The `toy` module below is a small made-up task, an inspection station on a factory belt. Swap its examples and actions for your own.
@@ -173,6 +190,7 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 | Any language, any engine | `simthinkd serve doom-defend --port 11890`, then POST the [decision request](docs/PROTOCOL.md) to `/v1/systemone` |
 | Unity / C# | [docs/INTEGRATION_UNITY.md](docs/INTEGRATION_UNITY.md): a client loop that keeps the game running while it waits |
 | Browser | [web/](web/): the same model in plain JavaScript, no server |
+| Java / JVM games and engines | [java/](java/): the same model in plain Java 8, inside your process; export weights with `tools/export_java_weights.py`; a test checks it chooses exactly what Python chooses |
 | A factory line (simulator) | [examples/factory_twin/](examples/factory_twin/): an inspection conveyor with a 400 ms deadline per part |
 | Gradio | [space/](space/): a small web demo you can run locally or on Hugging Face Spaces |
 | MCP (Claude Desktop, Cursor and others) | `pip install "simthinkd[mcp]"`, then `python -m simthinkd.integrations.mcp_server` |

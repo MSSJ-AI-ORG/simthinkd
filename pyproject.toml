@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simthinkd"
-version = "0.2.1"
+version = "0.3.0"
 description = "A 265k-parameter decision model that picks one action in about 2 ms on one CPU core, inside real-time loops."
 readme = "README.md"
 requires-python = ">=3.10"

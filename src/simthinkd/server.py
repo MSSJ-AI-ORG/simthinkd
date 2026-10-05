@@ -6,6 +6,7 @@ Binds to 127.0.0.1 by default. `--delay-ms` adds a fixed wait after inference (l
 """
 import json
 import socket
+import threading
 import time
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -14,6 +15,12 @@ from .core import Decider
 
 
 def make_handler(decider, name, delay_ms):
+    # One inference at a time per process. The threaded server runs one thread per connection, and NumPy's BLAS keeps its
+    # own worker threads; on 2026-10-04 a server fed by four parallel StarCraft games died after ~30 min with
+    # "malloc(): unaligned tcache chunk detected". Inference takes about 1 ms, so serialising it costs little; for more
+    # throughput run several server processes and spread clients over them.
+    infer_lock = threading.Lock()
+
     class Handler(BaseHTTPRequestHandler):
         protocol_version = 'HTTP/1.1'
 
@@ -38,9 +45,10 @@ def make_handler(decider, name, delay_ms):
                 return self._send(404, {'error': 'not found'})
             try:
                 body = json.loads(self.rfile.read(int(self.headers.get('Content-Length', 0))) or b'{}')
-                start = time.perf_counter()
-                answers = decider.predict(body)
-                infer_ms = (time.perf_counter() - start) * 1000
+                with infer_lock:
+                    start = time.perf_counter()
+                    answers = decider.predict(body)
+                    infer_ms = (time.perf_counter() - start) * 1000
             except (ValueError, KeyError, TypeError) as error:
                 return self._send(400, {'error': f'invalid request: {error}'})
             if delay_ms:

@@ -167,7 +167,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <header class="hero">
   <div class="wrap">
     <div class="hero-text">
-      <a class="pill" href="https://pypi.org/project/simthinkd/" data-i18n="hero.pill">v0.2.1 · open source, Apache 2.0</a>
+      <a class="pill" href="https://pypi.org/project/simthinkd/" data-i18n="hero.pill">v0.3.0 · open source, Apache 2.0</a>
       <h1 data-i18n="hero.h1">A <em>tiny</em> decision model that keeps up with real time.</h1>
       <p class="sub" data-i18n="hero.sub">It reads one short sentence about the situation and picks an action in about 2&nbsp;ms on one CPU core.
         <strong>No GPU, not even for training.</strong></p>
@@ -238,11 +238,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="kicker" data-i18n="features.kicker">What you get</div>
     <h2 data-i18n="features.h2">Small, fast and easy to own.</h2>
     <div class="cards">
-      <div class="card"><h3 data-i18n="features.c1h">One CPU core</h3><p data-i18n="features.c1p">About 2 ms per decision with 265,665 parameters. No GPU and no network needed.</p></div>
+      <div class="card"><h3 data-i18n="features.c1h">One CPU core</h3><p data-i18n="features.c1p">About 2 ms per decision with 265,665 parameters. No GPU and no network needed. One call can carry several questions, and one batch many situations.</p></div>
       <div class="card"><h3 data-i18n="features.c2h">Train in seconds</h3><p data-i18n="features.c2p">Write your rules as a normal function. The toy task in the README trains on a CPU in about 8 seconds.</p></div>
       <div class="card"><h3 data-i18n="features.c3h">NumPy only</h3><p data-i18n="features.c3p">Making decisions needs only NumPy. Training adds PyTorch, and the CPU build is fine.</p></div>
-      <div class="card"><h3 data-i18n="features.c4h">Plugs into your stack</h3><p data-i18n="features.c4p">An HTTP server, an MCP server and a LangChain tool come with the package.</p></div>
-      <div class="card"><h3 data-i18n="features.c5h">Measure your own model</h3><p data-i18n="features.c5p"><code>simthinkd bench</code> replays 1,050 recorded Doom states and tells you if a decider answers within one tick.</p></div>
+      <div class="card"><h3 data-i18n="features.c4h">Plugs into your stack</h3><p data-i18n="features.c4p">An HTTP server, an MCP server and a LangChain tool come with the package, and a plain Java 8 runtime runs the same model inside JVM games.</p></div>
+      <div class="card"><h3 data-i18n="features.c5h">Measure your own model</h3><p data-i18n="features.c5p"><code>simthinkd bench</code> replays 1,050 recorded Doom states and tells you if a decider answers within one tick. <code>--batch</code> compares one at a time with batches.</p></div>
       <div class="card"><h3 data-i18n="features.c6h">Checkable</h3><p data-i18n="features.c6p">The two bundled deciders are the ones evaluated in the paper. Their SHA-256 hashes are listed so you can check.</p></div>
     </div>
   </div>

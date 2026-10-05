@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <b>한국어</b> | <a href="README.ja.md">日本語</a></p>
 
-<!-- source-sha256: 4c3db07479e4f5b27969fe65c4fb775ee385a00c966258e58164d0d748da5c6f -->
+<!-- source-sha256: 00e99fb9a445a348fe4e458905c2c613c9dc27e9982a49f871399ca5da9dac41 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: 클라우드 판단을 대신하는 로컬 백업" width="100%"></p>
 
@@ -65,6 +65,23 @@ print(d.decide("seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | am
 호출 한 번이 판단 한 번입니다. 짧은 문장이 들어가고, 행동 하나와 해당 행동의 확률, 판단에 걸린 시간을 반환합니다. 첫 호출은 모델을 불러오느라 느립니다. 그다음부터는 한 번에 약 1 ms입니다.
 
 패키지에는 판단기 두 개가 들어 있습니다. `doom-defend`(가운데 서서 싸우기)와 `doom-corridor`(복도를 따라 싸우며 나아가기)입니다.
+
+## 한 번에 여러 판단
+
+한 번의 호출에 같은 상황에 대한 질문을 여러 개 실을 수 있고, 한 묶음에 여러 상황을 실을 수 있습니다. 하나씩 물었을 때와 같은 답이 나옵니다.
+
+```python
+from simthinkd import Decider
+
+d = Decider("doom-defend")
+states = ["seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25",
+          "seen: Demon right a30 d5 | enemies 1 | sway right | gun ready | ammo25"]
+answers = d.predict_batch([d.request(s) for s in states])   # many situations in one pass
+print([a["operation"]["choice"] for a in answers])
+# ['TURN_LEFT', 'TURN_RIGHT']
+```
+
+`simthinkd bench --batch` 로 내 컴퓨터에서 시간이 어디에 쓰이는지 볼 수 있습니다. 자세한 내용과 한계: [docs/PARALLEL.md](docs/PARALLEL.md).
 
 ## 몇 초 만에 직접 학습하기
 
@@ -178,6 +195,7 @@ SimThink D는 교사가 아는 것만 압니다. 추론하지 않고, 긴 글을
 | 어떤 언어, 어떤 엔진이든 | `simthinkd serve doom-defend --port 11890` 뒤 [판단 요청](docs/PROTOCOL.md)을 `/v1/systemone`으로 POST |
 | Unity / C# | [docs/INTEGRATION_UNITY.md](docs/INTEGRATION_UNITY.md): 기다리는 동안에도 게임이 멈추지 않는 클라이언트 루프 |
 | 브라우저 | [web/](web/): 같은 모델을 서버 없이 순수 JavaScript로 |
+| Java / JVM 게임·엔진 | [java/](java/): 같은 모델을 순수 Java 8로 프로그램 안에서 실행. 가중치는 `tools/export_java_weights.py` 로 내보내고, 파이썬과 똑같이 고르는지 시험으로 확인 |
 | 공장 라인(시뮬레이터) | [examples/factory_twin/](examples/factory_twin/): 부품마다 400 ms 이내에 판정을 내려야 하는 검사 컨베이어 |
 | Gradio | [space/](space/): 로컬이나 Hugging Face Spaces에서 돌리는 작은 웹 데모 |
 | MCP(Claude Desktop, Cursor 등) | `pip install "simthinkd[mcp]"` 뒤 `python -m simthinkd.integrations.mcp_server` |

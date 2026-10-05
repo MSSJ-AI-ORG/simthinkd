@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <a href="README.ko.md">한국어</a> | <b>日本語</b></p>
 
-<!-- source-sha256: 4c3db07479e4f5b27969fe65c4fb775ee385a00c966258e58164d0d748da5c6f -->
+<!-- source-sha256: 00e99fb9a445a348fe4e458905c2c613c9dc27e9982a49f871399ca5da9dac41 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: クラウドでの判断を代替するローカルバックアップ" width="100%"></p>
 
@@ -65,6 +65,23 @@ print(d.decide("seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | am
 1 回の呼び出しが 1 回の判断です。短い文を渡すと、行動が 1 つ、その確率と判断にかかった時間とともに返ってきます。最初の呼び出しはモデルの読み込みがあるので遅くなります。その後は 1 回あたり約 1 ms です。
 
 パッケージには判断器が 2 つ入っています。`doom-defend`（中央に立って戦う）と `doom-corridor`（廊下を戦いながら進む）です。
+
+## 一度に多くの判断
+
+1 回の呼び出しに、同じ状況についての質問を複数載せられます。1 つのバッチに複数の状況を載せることもできます。1 つずつ聞いたときと同じ答えが返ります。
+
+```python
+from simthinkd import Decider
+
+d = Decider("doom-defend")
+states = ["seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25",
+          "seen: Demon right a30 d5 | enemies 1 | sway right | gun ready | ammo25"]
+answers = d.predict_batch([d.request(s) for s in states])   # many situations in one pass
+print([a["operation"]["choice"] for a in answers])
+# ['TURN_LEFT', 'TURN_RIGHT']
+```
+
+`simthinkd bench --batch` で、手元のマシンで時間がどこに使われているかを確認できます。詳細と制限: [docs/PARALLEL.md](docs/PARALLEL.md)。
 
 ## 数秒で自分の判断器を学習する
 
@@ -177,6 +194,7 @@ SimThink D は教師が知っていることしか知りません。推論はせ
 | どの言語、どのエンジンでも | `simthinkd serve doom-defend --port 11890` を起動し、[判断リクエスト](docs/PROTOCOL.md)を `/v1/systemone` に POST |
 | Unity / C# | [docs/INTEGRATION_UNITY.md](docs/INTEGRATION_UNITY.md): 待っている間もゲームを止めないクライアントループ |
 | ブラウザ | [web/](web/): サーバーを使わず、プレーンな JavaScript で同じモデルを実行 |
+| Java / JVM のゲーム・エンジン | [java/](java/): 同じモデルを素の Java 8 でプロセス内で実行。重みは `tools/export_java_weights.py` で書き出し、Python とまったく同じ選択をすることをテストで確認 |
 | 工場のライン（シミュレーター） | [examples/factory_twin/](examples/factory_twin/): 部品ごとに 400 ms の制限時間がある検査コンベヤー |
 | Gradio | [space/](space/): 手元や Hugging Face Spaces で動かせる小さな Web デモ |
 | MCP（Claude Desktop、Cursor など） | `pip install "simthinkd[mcp]"` のあと `python -m simthinkd.integrations.mcp_server` |
