@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <b>한국어</b> | <a href="README.ja.md">日本語</a></p>
 
-<!-- source-sha256: 00e99fb9a445a348fe4e458905c2c613c9dc27e9982a49f871399ca5da9dac41 -->
+<!-- source-sha256: defa99cb8ecbe2e437e2158c53b35d9366776e67f66d146cffe2cf1524f3ce22 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: 클라우드 판단을 대신하는 로컬 백업" width="100%"></p>
 
@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <a href="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml"><img src="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
   <a href="https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
-  <a href="https://doi.org/10.5281/zenodo.23111615"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23111615.svg" alt="DOI"></a>
+  <a href="https://arxiv.org/abs/2610.04810"><img src="https://img.shields.io/badge/arXiv-2610.04810-b31b1b.svg" alt="arXiv:2610.04810"></a>
 </p>
 
 <p align="center"><b>네트워크가 끊겨도 판단은 현장에서.</b></p>
@@ -227,8 +227,7 @@ SimThink D는 교사가 아는 것만 압니다. 추론하지 않고, 긴 글을
 
 SimThink D를 쓰신다면 [CITATION.cff](CITATION.cff)로 인용해 주세요. GitHub에 "Cite this repository" 버튼이 나옵니다.
 
-- 소프트웨어: [doi:10.5281/zenodo.23111615](https://doi.org/10.5281/zenodo.23111615)
-- 논문(프리프린트): Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator", [doi:10.5281/zenodo.23111659](https://doi.org/10.5281/zenodo.23111659)
+- 논문: Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator", [arXiv:2610.04810](https://arxiv.org/abs/2610.04810)
 
 패키지에 든 판단기 두 개는 논문에서 평가한 바로 그 판단기입니다(SHA-256 동일). 이 저장소에서 다시 돌릴 수 있는 것과 아직 공개하지 않은 것은 [docs/REPRODUCE.md](docs/REPRODUCE.md)에 정리되어 있습니다.
 

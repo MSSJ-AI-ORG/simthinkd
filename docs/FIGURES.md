@@ -1,6 +1,6 @@
 # Figures from the paper
 
-These two figures come from the paper's preprint ([doi:10.5281/zenodo.23111659](https://doi.org/10.5281/zenodo.23111659)). The captions are the paper's own captions. The paper explains every arm and study name.
+These two figures come from the paper's preprint ([arXiv:2610.04810](https://arxiv.org/abs/2610.04810)). The captions are the paper's own captions. The paper explains every arm and study name.
 
 ## Time and quality, every study on one axis
 

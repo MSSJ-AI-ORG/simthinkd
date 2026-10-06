@@ -26,6 +26,10 @@ preferred-citation:
       given-names: Kihyeok
     - family-names: Kwon
       given-names: Wonok
-  doi: 10.5281/zenodo.23111659
+  url: "https://arxiv.org/abs/2610.04810"
+  identifiers:
+    - type: other
+      value: "arXiv:2610.04810"
+      description: "arXiv preprint (cs.LG)"
   year: 2026
-  notes: "Preprint"
+  notes: "arXiv:2610.04810 [cs.LG]"

@@ -58,7 +58,7 @@
       "code.colab": "Colab에서 열기", "code.readme": "README 읽기",
       "paper.kicker": "논문",
       "paper.h2": "판단 시간과 판단 품질을 나눠서 쟀습니다.",
-      "paper.doi1": "논문 프리프린트(DOI)", "paper.doi2": "소프트웨어(DOI)", "paper.repro": "재현할 수 있는 것",
+      "paper.doi1": "논문(arXiv)", "paper.repro": "재현할 수 있는 것",
       "footer.disc": "질문과 아이디어: GitHub Discussions"
     },
     "ja": {
@@ -113,7 +113,7 @@
       "code.colab": "Colab で開く", "code.readme": "README を読む",
       "paper.kicker": "論文",
       "paper.h2": "判断時間と判断の質を、分けて測る。",
-      "paper.doi1": "論文プレプリント（DOI）", "paper.doi2": "ソフトウェア（DOI）", "paper.repro": "再現できるもの",
+      "paper.doi1": "論文（arXiv）", "paper.repro": "再現できるもの",
       "footer.disc": "質問やアイデア: GitHub Discussions"
     }
   };

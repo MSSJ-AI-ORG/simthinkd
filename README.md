@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python 3.10+">
   <a href="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml"><img src="https://github.com/MSSJ-AI-ORG/simthinkd/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
   <a href="https://colab.research.google.com/github/MSSJ-AI-ORG/simthinkd/blob/main/notebooks/quickstart.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"></a>
-  <a href="https://doi.org/10.5281/zenodo.23111615"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23111615.svg" alt="DOI"></a>
+  <a href="https://arxiv.org/abs/2610.04810"><img src="https://img.shields.io/badge/arXiv-2610.04810-b31b1b.svg" alt="arXiv:2610.04810"></a>
 </p>
 
 <p align="center"><b>Network down. Decisions stay local.</b></p>
@@ -222,8 +222,7 @@ SimThink D only knows what its teacher knows. It does not reason, read long text
 
 If you use SimThink D, please cite it with [CITATION.cff](CITATION.cff). GitHub shows a "Cite this repository" button for it.
 
-- Software: [doi:10.5281/zenodo.23111615](https://doi.org/10.5281/zenodo.23111615)
-- Paper (preprint): Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator", [doi:10.5281/zenodo.23111659](https://doi.org/10.5281/zenodo.23111659)
+- Paper: Shin, Lee, Jeong and Kwon, "Separating Decision Time from Decision Quality in the Real-Time Gap of Distilled Deciders: Evidence from a Game and a Conveyor Simulator", [arXiv:2610.04810](https://arxiv.org/abs/2610.04810)
 
 The two bundled deciders are the exact deciders evaluated in the paper (same SHA-256). [docs/REPRODUCE.md](docs/REPRODUCE.md) lists what you can rerun from this repository and what is not released yet.
 
