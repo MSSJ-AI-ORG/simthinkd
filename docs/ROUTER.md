@@ -77,8 +77,16 @@ labelled "Submit request" on one screen and "Cancel request" on another). On a w
   the elements every training snapshot showed. The script author names the control each action presses. A fast action
   runs only if the decided state's elements are all there and the target control is present, enabled and not covered.
   Otherwise the route becomes a hand-over with reason `verify_disagree` (detail: `missing_elements`, `no_target`,
-  `target_disabled`, `target_covered` or `no_signature`). The wrapped router's monitor has already counted the route as a
-  fast action. `VerifiedRouter.counts` holds the agreements and disagreements.
+  `target_disabled`, `target_covered`, `target_moved` or `no_signature`). The wrapped router's monitor has already counted
+  the route as a fast action. `VerifiedRouter.counts` holds the agreements and disagreements. `where(route, observation)`
+  can give the target and the click point per route (for example the item a mission orders). With a point, the target
+  must contain it, else `target_moved`: the layout shifted and the fixed click would press something else.
+- `PopupGuard` (an unexpected popup): it looks at the topmost dialog in the snapshot (`role=dialog`, `alertdialog`,
+  `<dialog>`, `aria-modal`). If every control there is a close control (닫기, X, close), a never-again control
+  (다시 보지 않기, 오늘 하루 보지 않기) or an information link (자세히 보기), it names the close control to press. A
+  never-again control is pressed only with `allow_never_again=True`. Any other control (pay, agree, extend, leave, OK)
+  means the popup asks for a decision, so it is never closed automatically (`decision_needed`). After pressing, call
+  `router.expect([...])` with the screen that should come back, so the next route checks it.
 - The DOM is only available for web pages (and apps that expose an accessibility tree). For desktop programs, games and
   robots the capture route stays the only one.
 

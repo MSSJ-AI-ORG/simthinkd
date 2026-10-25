@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 import simthinkd
-from simthinkd import (CombinedAdapter, Decision, DomAdapter, DomVerifier, Router, ScreenAdapter, SkillTable,
+from simthinkd import (CombinedAdapter, Decision, DomAdapter, DomVerifier, PopupGuard, Router, ScreenAdapter, SkillTable,
                        VerifiedRouter)
 from simthinkd.dom_adapter import DOM_SNAPSHOT_JS, VERIFY_DISAGREE, element_key
 
@@ -173,8 +173,59 @@ def test_verified_router_hands_over_on_disagreement():
     assert refused(vr.route, {'pixels': px, 'title': 'Export'}) and refused(VerifiedRouter, object(), v)
 
 
+def test_verifier_point_and_per_call_target():
+    items = {'elements': [el('button', '치즈버거', x=52, y=130), el('button', '불고기버거', x=372, y=130)]}
+    for e in items['elements']:
+        e['w'], e['h'] = 280, 220
+    v = DomVerifier({'ITEMS': []})
+    assert v.verify('ITEMS', 'PICK_ITEM', items, target=('button', '불고기버거'), point=(512, 240)).agree
+    moved = v.verify('ITEMS', 'PICK_ITEM', items, target=('button', '불고기버거'), point=(192, 240))
+    assert not moved.agree and moved.reason == 'target_moved'  # the layout shifted: the fixed click would hit 치즈버거
+    assert v.verify('ITEMS', 'PICK_ITEM', items, target=('button', '새우버거')).reason == 'no_target'
+    items['elements'][1]['enabled'] = False
+    assert v.verify('ITEMS', 'PICK_ITEM', items, target=('button', '불고기버거'), point=(512, 240)).reason == 'target_disabled'
+    # VerifiedRouter passes the mission's target and click point through `where`
+    screen = ScreenAdapter()
+    px = np.full((48, 64, 3), 238, np.uint8)
+    obs = {'pixels': px, 'title': 'Burger', 'dom': items}
+    vr = VerifiedRouter(Router(Stub({screen(obs): ('ITEMS', 0.99)}), SkillTable({'ITEMS': ('PICK_ITEM', ['OPTION_1'])}),
+                               adapter=screen), v, where=lambda route, o: {'target': ('button', '치즈버거'), 'point': (512, 240)})
+    r = vr.route(obs)
+    assert r.reason == VERIFY_DISAGREE and r.detail == 'target_moved'
+    assert refused(VerifiedRouter, vr.router, v, where='not callable')
+
+
+def popup(*controls, dialog=2, covered=False):
+    return {'elements': [el('button', '주문하기', 600, 690, covered=True)] +
+            [dict(el('button', n, 300 + 120 * i, 400, covered=covered), dialog=dialog) for i, n in enumerate(controls)]}
+
+
+def test_popup_guard():
+    g = PopupGuard()
+    ok = g.check(popup('닫기'))
+    assert ok.ok and ok.control['name'] == '닫기' and ok.point == (350.0, 420.0) and ok.ms >= 0
+    assert g.check(popup('✕')).ok and g.check(popup('X')).ok and g.check(popup('자세히 보기', '닫기')).ok
+    assert g.check(popup('오늘 하루 보지 않기', '닫기')).control['name'] == '닫기'  # prefers close
+    nv = g.check(popup('다시 보지 않기'))
+    assert not nv.ok and nv.reason == 'never_again_not_allowed'
+    assert PopupGuard(allow_never_again=True).check(popup('다시 보지 않기')).ok
+    # popups that ask for a decision are never dismissed automatically, even with a close control
+    for controls in [('결제하기', '닫기'), ('연장하기', '닫기'), ('나가기', '닫기'), ('동의', '✕'), ('확인',)]:
+        r = g.check(popup(*controls))
+        assert not r.ok and r.reason == 'decision_needed' and r.control is None, controls
+    assert g.check({'elements': [el('button', '닫기')]}).reason == 'no_dialog'
+    assert g.check(popup('닫기', covered=True)).reason == 'no_dialog'
+    assert g.check(popup('자세히 보기')).reason == 'no_dismiss_control'
+    # two dialogs: only the topmost one counts
+    two = popup('닫기', dialog=2)
+    two['elements'].append(dict(el('button', '담기', 600, 560), dialog=1))
+    assert g.check(two).ok
+    assert 'dialog' in DomAdapter()(popup('닫기')) and 'dialog' not in DomAdapter()(FORM)
+
+
 def test_exports():
-    for name in ['DomAdapter', 'CombinedAdapter', 'DomVerifier', 'VerifiedRouter', 'ScreenAdapter', 'Router', 'Decider']:
+    for name in ['DomAdapter', 'CombinedAdapter', 'DomVerifier', 'VerifiedRouter', 'PopupGuard', 'ScreenAdapter', 'Router',
+                 'Decider']:
         assert name in simthinkd.__all__ and hasattr(simthinkd, name)
 
 

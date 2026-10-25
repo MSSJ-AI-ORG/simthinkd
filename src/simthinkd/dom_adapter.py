@@ -3,6 +3,7 @@
     DomAdapter()                       DOM snapshot (+ title, previous action) -> 'title: Export | path: /index.html | prev: START | dom: button submit_request ; ...'
     CombinedAdapter()                  screenshot + DOM snapshot               -> the ScreenAdapter sentence + ' | dom: ...'
     DomVerifier.fit(...)               capture decides, DOM checks             -> agree / disagree (with a reason)
+    PopupGuard()                       an unexpected popup: may it be closed without the large model? which control?
     VerifiedRouter(router, verifier)   a Router whose fast actions must pass the DOM check, else a hand-over 'verify_disagree'
 
 A DOM snapshot is a small dict that you collect from the page (for a browser, `DOM_SNAPSHOT_JS` through the Chrome DevTools
@@ -36,6 +37,7 @@ DOM_SNAPSHOT_JS = r"""(() => {
   const sel = 'button,a[href],input:not([type=hidden]),select,textarea,[role=button],[role=link],[role=checkbox],[role=tab],' +
               '[role=menuitem],[role=option],[role=radio],[role=switch],[tabindex]:not([tabindex="-1"])';
   const W = window.innerWidth, H = window.innerHeight, out = [];
+  const DQ = '[role=dialog],[role=alertdialog],dialog,[aria-modal=true]', dialogs = Array.from(document.querySelectorAll(DQ));
   const roleOf = (e) => {
     const r = e.getAttribute('role'); if (r) return r;
     const tag = e.tagName.toLowerCase();
@@ -64,13 +66,14 @@ DOM_SNAPSHOT_JS = r"""(() => {
     const cx = Math.min(W - 1, Math.max(0, r.left + r.width / 2)), cy = Math.min(H - 1, Math.max(0, r.top + r.height / 2));
     const hit = document.elementFromPoint(cx, cy);
     out.push({role: roleOf(e), name: nameOf(e), enabled: !(e.disabled || e.getAttribute('aria-disabled') === 'true'),
-              covered: !(hit && (hit === e || e.contains(hit))), x: Math.round(r.left), y: Math.round(r.top),
+              covered: !(hit && (hit === e || e.contains(hit))), dialog: dialogs.indexOf(e.closest(DQ)) + 1,
+              x: Math.round(r.left), y: Math.round(r.top),
               w: Math.round(r.width), h: Math.round(r.height)});
   }
   return {schema: 'simthinkd-dom/1', title: document.title, path: location.pathname, elements: out, ms: performance.now() - t0};
 })()"""
 
-_KNOWN = ('role', 'name', 'enabled', 'covered', 'x', 'y', 'w', 'h')
+_KNOWN = ('role', 'name', 'enabled', 'covered', 'dialog', 'x', 'y', 'w', 'h')
 
 
 def _word(text, limit):
@@ -152,6 +155,8 @@ class DomAdapter:
                 w += ' disabled'
             if e.get('covered'):
                 w += ' covered'
+            if e.get('dialog'):
+                w += ' dialog'
             words.append(w)
         return 'dom: ' + (' ; '.join(words) if words else 'none')
 
@@ -185,7 +190,7 @@ class CombinedAdapter:
 @dataclass(frozen=True)
 class Verdict:
     agree: bool
-    reason: str = None      # None, 'no_signature', 'missing_elements', 'no_target', 'target_disabled', 'target_covered'
+    reason: str = None      # None, 'no_signature', 'missing_elements', 'no_target', 'target_disabled', 'target_covered', 'target_moved'
     missing: tuple = ()
     ms: float = 0.0
 
@@ -225,12 +230,14 @@ class DomVerifier:
         sig = {s: {k for k, n in keys.items() if n >= min_share * count[s] - 1e-9} for s, keys in seen.items()}
         return cls(sig, targets, max_name)
 
-    def verify(self, state, action, snapshot):
+    def verify(self, state, action, snapshot, target=None, point=None):
+        """target: (role, name) for this call only (e.g. the item a mission orders); point: (x, y) the scripted action will
+        press. With a point, the target must also contain that point, else 'target_moved' (the layout shifted)."""
         t0 = time.perf_counter()
-        v = self._verify(state, action, snapshot)
+        v = self._verify(state, action, snapshot, target, point)
         return Verdict(v[0], v[1], v[2], (time.perf_counter() - t0) * 1000)
 
-    def _verify(self, state, action, snapshot):
+    def _verify(self, state, action, snapshot, target=None, point=None):
         if state not in self.signatures:
             return False, 'no_signature', ()
         els = _elements(snapshot)
@@ -240,15 +247,22 @@ class DomVerifier:
         missing = tuple(sorted(k for k in self.signatures[state] if k not in have))
         if missing:
             return False, 'missing_elements', missing
-        target = self.targets.get(action)
+        if target is not None:
+            target = (_word(target[0], 16) or 'element', _word(target[1], self.max_name))
+        else:
+            target = self.targets.get(action)
         if target is not None:
             found = have.get(target)
             if not found:
                 return False, 'no_target', (target,)
-            if not any(e.get('enabled', True) is not False for e in found):
+            found = [e for e in found if e.get('enabled', True) is not False]
+            if not found:
                 return False, 'target_disabled', (target,)
-            if not any(not e.get('covered') for e in found if e.get('enabled', True) is not False):
+            found = [e for e in found if not e.get('covered')]
+            if not found:
                 return False, 'target_covered', (target,)
+            if point is not None and not any(_contains(e, point) for e in found):
+                return False, 'target_moved', (target,)
         return True, None, ()
 
     def to_dict(self):
@@ -263,21 +277,106 @@ class DomVerifier:
                    {a: tuple(t) for a, t in data['targets'].items()}, data.get('max_name', 32))
 
 
+def _contains(e, point):
+    if not all(k in e for k in ('x', 'y', 'w', 'h')):
+        return False
+    x, y = point
+    return e['x'] <= x < e['x'] + e['w'] and e['y'] <= y < e['y'] + e['h']
+
+
+def _norm(name):
+    return ' '.join(unicodedata.normalize('NFKC', str(name or '')).lower().split())
+
+
+@dataclass(frozen=True)
+class PopupVerdict:
+    ok: bool
+    reason: str = None      # None, 'no_dialog', 'decision_needed', 'never_again_not_allowed', 'no_dismiss_control'
+    control: dict = None    # the element to press (with x, y, w, h) when ok
+    others: tuple = ()      # names of the controls that block an automatic dismissal
+    ms: float = 0.0
+
+    @property
+    def point(self):
+        c = self.control
+        if c is None or not all(k in c for k in ('x', 'y', 'w', 'h')):
+            return None
+        return (c['x'] + c['w'] / 2, c['y'] + c['h'] / 2)
+
+
+class PopupGuard:
+    """Decides from the DOM whether an unexpected popup may be dismissed without the large model.
+
+    It looks at the topmost dialog (role=dialog / alertdialog / <dialog> / aria-modal; the snapshot's 'dialog' index) and
+    its uncovered controls. Each control is a close control ('닫기', 'X', 'close'), a never-again control ('다시 보지 않기',
+    '오늘 하루 보지 않기'), an information link ('자세히 보기') or anything else. Anything else (pay, agree, extend, leave,
+    OK ...) means the popup asks for a decision: no automatic dismissal ('decision_needed'). Otherwise a close control is
+    pressed; a never-again control only if allow_never_again. After pressing, the caller must check that the expected
+    screen comes back (Router.expect) and hand over if it does not."""
+
+    CLOSE = ('닫기', 'close', 'x', '×', '✕', '✖', '╳')
+    NEVER = ('다시 보지 않기', '오늘 하루 보지 않기', '오늘 그만 보기', '다시 보지 않음', "don't show again", 'do not show again')
+    INFO = ('자세히 보기', '더보기', '더 보기', 'learn more')
+
+    def __init__(self, allow_never_again=False, close=None, never=None, info=None):
+        self.allow_never_again = bool(allow_never_again)
+        self.close = tuple(_norm(w) for w in (close or self.CLOSE))
+        self.never = tuple(_norm(w) for w in (never or self.NEVER))
+        self.info = tuple(_norm(w) for w in (info or self.INFO))
+
+    def kind(self, name):
+        n = _norm(name)
+        if n in self.close:
+            return 'close'
+        if n in self.never:
+            return 'never'
+        if n in self.info:
+            return 'info'
+        return 'other'
+
+    def check(self, snapshot):
+        t0 = time.perf_counter()
+        ok, reason, control, others = self._check(snapshot)
+        return PopupVerdict(ok, reason, control, others, (time.perf_counter() - t0) * 1000)
+
+    def _check(self, snapshot):
+        els = [e for e in _elements(snapshot) if e.get('dialog') and not e.get('covered')]
+        if not els:
+            return False, 'no_dialog', None, ()
+        top = max(int(e['dialog']) for e in els)
+        els = sorted((e for e in els if int(e['dialog']) == top), key=_order)
+        kinds = [(self.kind(e.get('name')), e) for e in els]
+        others = tuple(e.get('name', '') for k, e in kinds if k == 'other')
+        if others:
+            return False, 'decision_needed', None, others
+        for want in ('close', 'never'):
+            for k, e in kinds:
+                if k == want and e.get('enabled', True) is not False:
+                    if want == 'never' and not self.allow_never_again:
+                        return False, 'never_again_not_allowed', None, (e.get('name', ''),)
+                    return True, None, e, ()
+        return False, 'no_dismiss_control', None, ()
+
+
 class VerifiedRouter:
     """Capture decides, DOM verifies (two steps). route(observation) first asks the wrapped Router; a fast action is then
     checked by the DomVerifier on observation['dom']. If they disagree, the answer is a hand-over with reason
     'verify_disagree' (detail = the verifier's reason), the router's episode expectation is cleared (as after any
     hand-over) and the observation is kept for relearning. Hand-overs of the wrapped router pass through unchanged.
+    where(route, observation), if given, returns {'target': (role, name), 'point': (x, y)} for this route (a mission
+    parameter such as the item to order, and the point the scripted click will press).
 
     The wrapped router's monitor (if any) has already counted the route as a fast action; the verifier's hand-overs are
     counted here in `counts` and `verdicts`."""
 
-    def __init__(self, router, verifier, dom_key='dom'):
+    def __init__(self, router, verifier, dom_key='dom', where=None):
         if not callable(getattr(router, 'route', None)):
             raise ValueError('router must be a simthinkd.Router')
         if not callable(getattr(verifier, 'verify', None)):
             raise ValueError('verifier must have verify(state, action, snapshot)')
-        self.router, self.verifier, self.dom_key = router, verifier, dom_key
+        if where is not None and not callable(where):
+            raise ValueError('where must be callable: (route, observation) -> {"target": (role, name), "point": (x, y)}')
+        self.router, self.verifier, self.dom_key, self.where = router, verifier, dom_key, where
         self.counts = {'agree': 0, 'disagree': 0}
         self.last_verdict = None
 
@@ -294,7 +393,9 @@ class VerifiedRouter:
         self.last_verdict = None
         if route.kind != 'action':
             return route
-        verdict = self.verifier.verify(route.state, route.action, observation[self.dom_key])
+        extra = (self.where(route, observation) or {}) if self.where else {}
+        verdict = self.verifier.verify(route.state, route.action, observation[self.dom_key], extra.get('target'),
+                                       extra.get('point'))
         self.last_verdict = verdict
         if verdict.agree:
             self.counts['agree'] += 1

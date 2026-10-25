@@ -5,10 +5,10 @@
 
 Router kit (0.4.0): Router + SkillTable hand a case over to a large model when the decider is unsure, the state is
 unknown, or the last fast action did not lead to an expected next state; relearn() retrains and hot-swaps.
-DOM input: DomAdapter, CombinedAdapter, and DomVerifier + VerifiedRouter (capture decides, DOM verifies).
+DOM input: DomAdapter, CombinedAdapter, DomVerifier + VerifiedRouter (capture decides, DOM verifies), PopupGuard.
 """
 from .adapters import PipelineAdapter, ScreenAdapter, VectorAdapter
-from .dom_adapter import CombinedAdapter, DomAdapter, DomVerifier, VerifiedRouter
+from .dom_adapter import CombinedAdapter, DomAdapter, DomVerifier, PopupGuard, VerifiedRouter
 from .core import Decider, Decision, available, build_request
 from .relearn import RelearnReport, relearn
 from .router import HandoffMonitor, Route, Router, Skill, SkillTable
@@ -18,7 +18,7 @@ __version__ = '0.4.0'
 __all__ = ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__',
            'Router', 'Route', 'Skill', 'SkillTable', 'HandoffMonitor', 'relearn', 'RelearnReport',
            'ScreenAdapter', 'PipelineAdapter', 'VectorAdapter',
-           'DomAdapter', 'CombinedAdapter', 'DomVerifier', 'VerifiedRouter']
+           'DomAdapter', 'CombinedAdapter', 'DomVerifier', 'VerifiedRouter', 'PopupGuard']
 
 
 def fit(*args, **kwargs):
