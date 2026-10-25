@@ -8,6 +8,7 @@
 - Feature adapters: `ScreenAdapter` (colour grid of a screenshot + window title + previous action), `PipelineAdapter` (request fields + gate verdict), `VectorAdapter` (quantised part of an observation vector).
 - `examples/router_screen`: the router logic on a small synthetic screen task, with no network and a stub large model. It includes a sealed preregistration (`seal_prereg.py`, `PREREG_TEMPLATE.json`) and the sealed results.
 - Tests: `tests/test_router.py` (NumPy only) and `tests/test_router_example.py` (runs the example twice and checks that the digest is the same).
+- DOM input (`src/simthinkd/dom_adapter.py`, new module; router.py, relearn.py and adapters.py are unchanged): `DomAdapter` turns a compact DOM snapshot (visible interactive elements: role, accessible name or text, enabled, covered; page title and URL path) into the same sentence form the decider reads. It never reads what a person typed, drops the URL query, bounds the length and sorts the elements in reading order. `CombinedAdapter` puts the screenshot grid and the DOM part in one sentence. `DomVerifier` + `VerifiedRouter`: the screenshot decides, the DOM checks (the state's learned element signature, and that the target control exists, is enabled and is not covered); on a disagreement the case is handed over with reason `verify_disagree`. `DOM_SNAPSHOT_JS` collects a snapshot through the Chrome DevTools protocol. Tests: `tests/test_dom_adapter.py`.
 - No change to the 0.3.0 API. Existing deciders and score models load and answer as before.
 
 ## 0.3.0 - 2026-10-05

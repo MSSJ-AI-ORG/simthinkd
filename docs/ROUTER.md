@@ -1,7 +1,7 @@
 # Router kit (0.4.0)
 
 SimThink D in front of a large model: a fast path for what it knows, and a hand-over for the rest. This page covers the
-design, the rules and the limits. The code is `src/simthinkd/router.py`, `relearn.py` and `adapters.py`.
+design, the rules and the limits. The code is `src/simthinkd/router.py`, `relearn.py`, `adapters.py` and `dom_adapter.py`.
 
 ## Parts
 
@@ -24,7 +24,8 @@ every route ─► HandoffMonitor ─► fired ─► relearn: teacher labels �
 | Skill table | `SkillTable({...})`, `SkillTable.from_transitions(...)`, `save` / `load` | per state: scripted action, expected next states, final |
 | Monitor | `HandoffMonitor(window=10, rate=0.5, no_progress=3)` | relearning trigger |
 | Relearn | `relearn(router, teacher, observations, base_examples, out=..., log=...)` | teacher labels, retraining, hot swap, log |
-| Adapters | `ScreenAdapter`, `PipelineAdapter`, `VectorAdapter` | observation -> sentence |
+| Adapters | `ScreenAdapter`, `PipelineAdapter`, `VectorAdapter`, `DomAdapter`, `CombinedAdapter` | observation -> sentence |
+| DOM check | `DomVerifier`, `VerifiedRouter(router, verifier)` | capture decides, DOM verifies; hand-over `verify_disagree` |
 
 ## Rules
 
@@ -60,6 +61,26 @@ every route ─► HandoffMonitor ─► fired ─► relearn: teacher labels �
   first reasons. It is for routing inside a fixed pipeline: which step next, what a gate failure means, which model tier.
 - `VectorAdapter`: the chosen entries of a numeric vector, each clipped to its range and put in one of `levels` bins.
   Missing or infinite values are refused.
+
+## DOM input (dom_adapter.py)
+
+The colour grid cannot tell two screens apart when they look the same but mean different things (the same green button
+labelled "Submit request" on one screen and "Cancel request" on another). On a web page the DOM can.
+
+- `DomAdapter`: a DOM snapshot -> `title: ... | path: /index.html | prev: ... | dom: button submit_request ; textbox username`.
+  Only visible interactive elements (buttons, links, fields, ARIA roles), each as role + name, plus `disabled` and
+  `covered` (another element sits on its centre, e.g. a banner or a dialog). What a person typed is never read; the URL
+  keeps its path only. At most `max_elements` (32) elements of at most `max_name` (32) characters, in reading order.
+  `DOM_SNAPSHOT_JS` collects the snapshot in a browser through the Chrome DevTools protocol (`Runtime.evaluate`).
+- `CombinedAdapter`: the ScreenAdapter sentence followed by the DOM part (the union of both inputs).
+- `DomVerifier` + `VerifiedRouter` (two steps: the screenshot decides, the DOM checks). The verifier learns, per state,
+  the elements every training snapshot showed. The script author names the control each action presses. A fast action
+  runs only if the decided state's elements are all there and the target control is present, enabled and not covered.
+  Otherwise the route becomes a hand-over with reason `verify_disagree` (detail: `missing_elements`, `no_target`,
+  `target_disabled`, `target_covered` or `no_signature`). The wrapped router's monitor has already counted the route as a
+  fast action. `VerifiedRouter.counts` holds the agreements and disagreements.
+- The DOM is only available for web pages (and apps that expose an accessibility tree). For desktop programs, games and
+  robots the capture route stays the only one.
 
 ## Limits
 

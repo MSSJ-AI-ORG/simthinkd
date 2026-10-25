@@ -30,5 +30,7 @@ jobs:
         run: python -X utf8 tests/test_server_latency.py
       - name: Router kit
         run: python -X utf8 tests/test_router.py
+      - name: Router kit DOM input
+        run: python -X utf8 tests/test_dom_adapter.py
       - name: Router kit example (sealed PREREG, reproducible twice)
         run: python -X utf8 tests/test_router_example.py
