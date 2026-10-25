@@ -1,0 +1,315 @@
+{
+ "prereg": "PREREG_router_screen.json",
+ "prereg_sha256": "ef240fe4ebb3c336b8d75c8561810d63b3a17defdf5f30906ee6d556f8224d67",
+ "simthinkd": "0.4.0",
+ "teach": {
+  "runs": 40,
+  "runs_ok": 40,
+  "examples": 192,
+  "skills": {
+   "LOGIN": {
+    "action": "FILL_LOGIN",
+    "expect": [
+     "PROFILE"
+    ],
+    "final": false
+   },
+   "PROFILE": {
+    "action": "SUBMIT",
+    "expect": [
+     "DONE",
+     "ERROR"
+    ],
+    "final": false
+   },
+   "DONE": {
+    "action": "STOP",
+    "expect": null,
+    "final": true
+   },
+   "ERROR": {
+    "action": "CLOSE",
+    "expect": [
+     "PROFILE"
+    ],
+    "final": false
+   }
+  }
+ },
+ "router_A_sha256": "e69d00375dc7f633bfa111500ac137a0da14c98f8a0fc7470fd3452679261931",
+ "learned": {
+  "trials": 20,
+  "success": 20,
+  "false_stop": 0,
+  "routes": 118,
+  "fast": 110,
+  "big_model_calls": 8,
+  "big_calls_per_trial": 0.4,
+  "handoff_rate": 0.0678,
+  "handoff_reasons": {
+   "low_confidence": 4,
+   "no_progress": 4
+  },
+  "fast_wrong": 4,
+  "fast_wrong_caught_next": 4,
+  "fast_wrong_caught_by_no_progress": 4,
+  "fast_wrong_not_caught": 0,
+  "fast_wrong_final": 0,
+  "route_ms_p50": 1.496,
+  "route_ms_p95": 2.282
+ },
+ "learned_by_perturb": {
+  "banner": {
+   "trials": 4,
+   "success": 4,
+   "false_stop": 0,
+   "routes": 32,
+   "fast": 28,
+   "big_model_calls": 4,
+   "big_calls_per_trial": 1.0,
+   "handoff_rate": 0.125,
+   "handoff_reasons": {
+    "no_progress": 4
+   },
+   "fast_wrong": 4,
+   "fast_wrong_caught_next": 4,
+   "fast_wrong_caught_by_no_progress": 4,
+   "fast_wrong_not_caught": 0,
+   "fast_wrong_final": 0,
+   "route_ms_p50": 1.563,
+   "route_ms_p95": 2.06
+  },
+  "none": {
+   "trials": 12,
+   "success": 12,
+   "false_stop": 0,
+   "routes": 64,
+   "fast": 64,
+   "big_model_calls": 0,
+   "big_calls_per_trial": 0.0,
+   "handoff_rate": 0.0,
+   "handoff_reasons": {},
+   "fast_wrong": 0,
+   "fast_wrong_caught_next": 0,
+   "fast_wrong_caught_by_no_progress": 0,
+   "fast_wrong_not_caught": 0,
+   "fast_wrong_final": 0,
+   "route_ms_p50": 1.507,
+   "route_ms_p95": 2.253
+  },
+  "session": {
+   "trials": 4,
+   "success": 4,
+   "false_stop": 0,
+   "routes": 22,
+   "fast": 18,
+   "big_model_calls": 4,
+   "big_calls_per_trial": 1.0,
+   "handoff_rate": 0.1818,
+   "handoff_reasons": {
+    "low_confidence": 4
+   },
+   "fast_wrong": 0,
+   "fast_wrong_caught_next": 0,
+   "fast_wrong_caught_by_no_progress": 0,
+   "fast_wrong_not_caught": 0,
+   "fast_wrong_final": 0,
+   "route_ms_p50": 1.381,
+   "route_ms_p95": 2.089
+  }
+ },
+ "negative_wrong_expectation": {
+  "trials": 12,
+  "success": 12,
+  "false_stop": 0,
+  "routes": 64,
+  "fast": 38,
+  "big_model_calls": 26,
+  "big_calls_per_trial": 2.167,
+  "handoff_rate": 0.4062,
+  "handoff_reasons": {
+   "no_progress": 26
+  },
+  "fast_wrong": 0,
+  "fast_wrong_caught_next": 0,
+  "fast_wrong_caught_by_no_progress": 0,
+  "fast_wrong_not_caught": 0,
+  "fast_wrong_final": 0,
+  "route_ms_p50": 1.371,
+  "route_ms_p95": 1.694
+ },
+ "negative_wrong_action": {
+  "trials": 12,
+  "success": 12,
+  "false_stop": 0,
+  "routes": 76,
+  "fast": 64,
+  "big_model_calls": 12,
+  "big_calls_per_trial": 1.0,
+  "handoff_rate": 0.1579,
+  "handoff_reasons": {
+   "no_progress": 12
+  },
+  "fast_wrong": 12,
+  "fast_wrong_caught_next": 12,
+  "fast_wrong_caught_by_no_progress": 12,
+  "fast_wrong_not_caught": 0,
+  "fast_wrong_final": 0,
+  "route_ms_p50": 1.41,
+  "route_ms_p95": 1.995
+ },
+ "redesign_before": {
+  "trials": 10,
+  "success": 10,
+  "false_stop": 0,
+  "routes": 58,
+  "fast": 17,
+  "big_model_calls": 41,
+  "big_calls_per_trial": 4.1,
+  "handoff_rate": 0.7069,
+  "handoff_reasons": {
+   "low_confidence": 35,
+   "no_progress": 6
+  },
+  "fast_wrong": 6,
+  "fast_wrong_caught_next": 6,
+  "fast_wrong_caught_by_no_progress": 6,
+  "fast_wrong_not_caught": 0,
+  "fast_wrong_final": 0,
+  "route_ms_p50": 1.697,
+  "route_ms_p95": 2.456
+ },
+ "trigger": {
+  "window": 10,
+  "rate": 0.5,
+  "no_progress": 3,
+  "routes": 58,
+  "fired_at": 10,
+  "handoff_rate": 0.8,
+  "no_progress_count": 1
+ },
+ "relearn": {
+  "forced": false,
+  "teacher_calls": 101,
+  "teacher_skipped": 0,
+  "handed_over_screens": 41,
+  "new_examples": 101,
+  "examples": 293,
+  "labels": [
+   "DONE",
+   "ERROR",
+   "LOGIN",
+   "PROFILE"
+  ],
+  "old_sha256": "e69d00375dc7f633bfa111500ac137a0da14c98f8a0fc7470fd3452679261931",
+  "new_sha256": "539c8f1925149c17f331e9afd3223dca612fca0ddb93e7ac5c49e399d393c8a1",
+  "swapped": true
+ },
+ "redesign_after": {
+  "trials": 18,
+  "success": 18,
+  "false_stop": 0,
+  "routes": 96,
+  "fast": 96,
+  "big_model_calls": 0,
+  "big_calls_per_trial": 0.0,
+  "handoff_rate": 0.0,
+  "handoff_reasons": {},
+  "fast_wrong": 0,
+  "fast_wrong_caught_next": 0,
+  "fast_wrong_caught_by_no_progress": 0,
+  "fast_wrong_not_caught": 0,
+  "fast_wrong_final": 0,
+  "route_ms_p50": 1.657,
+  "route_ms_p95": 2.302
+ },
+ "layout_A_after": {
+  "trials": 10,
+  "success": 10,
+  "false_stop": 0,
+  "routes": 54,
+  "fast": 54,
+  "big_model_calls": 0,
+  "big_calls_per_trial": 0.0,
+  "handoff_rate": 0.0,
+  "handoff_reasons": {},
+  "fast_wrong": 0,
+  "fast_wrong_caught_next": 0,
+  "fast_wrong_caught_by_no_progress": 0,
+  "fast_wrong_not_caught": 0,
+  "fast_wrong_final": 0,
+  "route_ms_p50": 1.5,
+  "route_ms_p95": 2.122
+ },
+ "digest": "7cd3410767ab22a74d39a607a6562b547b67ff7cecf82ef09a70d11e0f9a53e2",
+ "timing": {
+  "train_A_seconds": 6.34,
+  "relearn_train_seconds": 3.704
+ },
+ "relearn_log": [
+  {
+   "at": "2026-10-25T09:17:41+00:00",
+   "trigger": {
+    "window": 10,
+    "rate": 0.5,
+    "no_progress": 3,
+    "routes": 58,
+    "fired_at": 10,
+    "handoff_rate": 0.8,
+    "no_progress_count": 1,
+    "forced": false
+   },
+   "teacher_calls": 101,
+   "teacher_skipped": 0,
+   "new_examples": 101,
+   "examples": 293,
+   "labels": [
+    "DONE",
+    "ERROR",
+    "LOGIN",
+    "PROFILE"
+   ],
+   "teach_seconds": 0.58,
+   "train_seconds": 3.704,
+   "old_sha256": "e69d00375dc7f633bfa111500ac137a0da14c98f8a0fc7470fd3452679261931",
+   "new_sha256": "539c8f1925149c17f331e9afd3223dca612fca0ddb93e7ac5c49e399d393c8a1",
+   "out": "out\\router_B",
+   "schema": "simthinkd-relearn/1"
+  }
+ ],
+ "hypotheses_verdict": {
+  "H1": {
+   "pass": true,
+   "evidence": "learned_by_perturb.none: success 12/12, handoff_rate 0.0"
+  },
+  "H2": {
+   "pass": true,
+   "evidence": "banner 4/4 (4 no-progress hand-overs) + session 4/4 (4 low-confidence hand-overs); learned false_stop 0"
+  },
+  "H3": {
+   "pass": true,
+   "evidence": "fast_wrong_not_caught = 0 in learned (4 of 4 caught), negative_wrong_expectation (0 wrong), negative_wrong_action (12 of 12 caught)"
+  },
+  "H4": {
+   "pass": true,
+   "evidence": "per run (replay with the saved router_A): wrong expectation no-progress hand-overs [3,3,1,3,1,2,2,1,1,3,3,3]; wrong action wrong fast actions [1]*12, all caught by no-progress"
+  },
+  "H5": {
+   "pass": true,
+   "evidence": "trigger fired_at 10 (hand-over rate 0.8 over the first full window)"
+  },
+  "H6": {
+   "pass": true,
+   "evidence": "redesign_after: success 18/18, handoff_rate 0.0 <= 0.0 + 0.10"
+  },
+  "H7": {
+   "pass": true,
+   "evidence": "layout_A_after: success 10/10"
+  },
+  "H8": {
+   "pass": true,
+   "evidence": "second run on the same machine: same digest 7cd34107..."
+  }
+ },
+ "machine_note": "Windows 11, Python 3.14.0, NumPy 2.4.0, PyTorch 2.13.0+cpu; route and training times are for this machine and not part of the digest"
+}

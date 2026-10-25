@@ -1,0 +1,35 @@
+{
+ "schema": "sd-prereg/1",
+ "name": "PREREG_<experiment>_v1",
+ "_how": "Copy this file, fill every field, run a pilot on pilot seeds only, then: python seal_prereg.py seal PREREG_<experiment>_v1.json --freeze <code files>. After sealing, change nothing; report results as measured.",
+ "created_kst": "<YYYY-MM-DDTHH:MM:SS>",
+ "question": "<one sentence: what the experiment decides>",
+ "conditions": {
+  "<name>": "<how this condition decides, e.g. large model every step / router + large model / script only>"
+ },
+ "tasks": {
+  "<task id>": "<what the task is>"
+ },
+ "train_seeds": [0, 0],
+ "test_seeds": [0, 0],
+ "pilot_seeds": [0, 0],
+ "seed_note": "<train, test and pilot seeds never overlap>",
+ "perturb_schedule": ["none"],
+ "perturb_note": "<which disturbances never appear in training>",
+ "tau": 0.9,
+ "tau_source": "<fixed a priori, or set on pilot seeds only; never on test seeds>",
+ "trigger": {"window": 10, "rate": 0.5, "no_progress": 3},
+ "trigger_source": "<e.g. same as v2.2, fixed a priori>",
+ "steps": 600,
+ "seed": 31,
+ "max_actions": 10,
+ "repetitions": 1,
+ "success": "<execution-verified final state: what counts as success, read from the environment, never from the decider>",
+ "metrics": ["<success rate with Wilson 95% CI>", "<large-model calls per trial>", "<hand-over rate and reasons>", "<wrong fast actions and whether each was caught>"],
+ "hypotheses": {
+  "H1": "<a measurable statement with its threshold>"
+ },
+ "stop_rule": "results reported as measured; no re-run with changed tau, trigger or criteria under this PREREG; failed hypotheses are reported as failed",
+ "safety": "<machines, accounts, network; what the experiment never touches>",
+ "frozen": {}
+}

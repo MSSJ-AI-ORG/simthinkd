@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 - unreleased
+
+- Router kit. `Router` + `SkillTable`: SimThink D names the state, the skill table gives the scripted action, and the router hands the case over (to a large model or a person) for one of three reasons: `low_confidence`, `unknown_state`, `no_progress`. The no-progress check compares the observed state with the expected next states of the last fast action, so a confident wrong action is caught at the next observation. `SkillTable.from_transitions` learns the expected next states from teacher runs. `Router.reset(expect=...)` checks the first state of an episode too.
+- `HandoffMonitor`: relearning trigger over the last 10 routes (hand-over rate 0.5, or 3 no-progress hand-overs).
+- `relearn`: teacher labels, retraining, hot swap of the decider in a running router, and a JSON-lines log. It refuses to run before the monitor fires unless `force=True`.
+- Feature adapters: `ScreenAdapter` (colour grid of a screenshot + window title + previous action), `PipelineAdapter` (request fields + gate verdict), `VectorAdapter` (quantised part of an observation vector).
+- `examples/router_screen`: the router logic on a small synthetic screen task, with no network and a stub large model. It includes a sealed preregistration (`seal_prereg.py`, `PREREG_TEMPLATE.json`) and the sealed results.
+- Tests: `tests/test_router.py` (NumPy only) and `tests/test_router_example.py` (runs the example twice and checks that the digest is the same).
+- No change to the 0.3.0 API. Existing deciders and score models load and answer as before.
+
 ## 0.3.0 - 2026-10-05
 
 - Many decisions at once: `Decider.ask` answers several questions about one situation in one call (choice, score from 1 to 10 levels, true/false); each question is pooled on its own, so adding a question never changes another answer. `Decider.predict_batch` and `ask_batch` run many requests through the network in one pass and return the same answers as one at a time. See docs/PARALLEL.md.

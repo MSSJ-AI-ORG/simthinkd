@@ -1,0 +1,97 @@
+{
+ "schema": "sd-prereg/1",
+ "name": "PREREG_router_screen_v1",
+ "created_kst": "2026-10-25T21:30:00",
+ "question": "On a small synthetic fixed screen task, does the 0.4.0 router kit reproduce the v2.1/v2.2 router logic: fast scripted actions in the learned state, hand-over on unseen screens, every wrong fast action caught at the next observation, the sealed trigger firing on a redesign, and a relearning cycle that restores the learned-state level?",
+ "conditions": {
+  "router": "SimThink D screen-state decider (ScreenAdapter: 8x6 colour grid + window title + previous action) + SkillTable learned from teacher transitions (expected next states); fast action only if p >= tau, the state has a skill and it is an expected next state; else the stub large model",
+  "negative_wrong_expectation": "same as router, with the PROFILE skill expecting LOGIN (deliberately wrong)",
+  "negative_wrong_action": "same as router, with the LOGIN skill doing SUBMIT (deliberately wrong action)"
+ },
+ "tasks": {
+  "T": "sign in, save a profile form, close 0-2 error dialogs and save again (examples/router_screen/screens.py)"
+ },
+ "large_model": "stub: reads the app's true screen and applies screens.POLICY; no network; counted as one call per hand-over",
+ "teacher": "stub: the app's true screen state (screens outside the task are skipped)",
+ "train_seeds": [
+  1001,
+  1040
+ ],
+ "test_seeds": [
+  1,
+  20
+ ],
+ "detect_seeds": [
+  2001,
+  2010
+ ],
+ "teach_seeds": [
+  3001,
+  3012
+ ],
+ "after_seeds": [
+  4001,
+  4018
+ ],
+ "recheck_seeds": [
+  5001,
+  5010
+ ],
+ "pilot_seeds": "9001-9510 (unsealed pilot of the code paths only)",
+ "perturb_schedule": [
+  "none",
+  "banner",
+  "none",
+  "session",
+  "none",
+  "none",
+  "banner",
+  "none",
+  "session",
+  "none"
+ ],
+ "perturb_note": "as v2.1: banner (covers the save button once) and session (expired page after the first action) never appear in training",
+ "tau": 0.9,
+ "tau_source": "same as v2.1 and v2.2, fixed a priori",
+ "trigger": {
+  "window": 10,
+  "rate": 0.5,
+  "no_progress": 3
+ },
+ "trigger_source": "same as v2.2, fixed a priori",
+ "steps": 600,
+ "seed": 31,
+ "max_actions": 10,
+ "repetitions": 1,
+ "success": "the app's final state is DONE with no overlay and no duplicate save, and the run stopped there (execution-verified)",
+ "metrics": [
+  "success",
+  "false stops",
+  "hand-over rate and reasons",
+  "large-model calls per trial",
+  "wrong fast actions: caught at the next route (any hand-over / by no-progress), not caught, wrong final",
+  "trigger fired_at",
+  "teacher calls, relearn training seconds, old and new weight hashes",
+  "route ms p50/p95 (not in the digest)"
+ ],
+ "hypotheses": {
+  "H1": "learned state, clean runs (perturb none): success = all, hand-over rate <= 0.20",
+  "H2": "learned state, unseen disturbances (banner, session): success >= 0.9 of those runs, false stops = 0",
+  "H3": "every wrong non-final fast action in the learned and both negative conditions is followed by a hand-over at the next route (fast_wrong_not_caught = 0)",
+  "H4": "negative_wrong_expectation: at least one no-progress hand-over per run; negative_wrong_action: every run has at least one wrong fast action and all of them are caught by no-progress",
+  "H5": "redesign: the trigger fires during the detect runs",
+  "H6": "after relearning on the redesign: success = all, hand-over rate <= learned-state clean hand-over rate + 0.10",
+  "H7": "layout A after relearning: success = all (no forgetting)",
+  "H8": "a second run on the same machine gives the same digest"
+ },
+ "stop_rule": "results reported as measured; no re-run with changed tau, trigger or criteria under this PREREG; failed hypotheses are reported as failed",
+ "safety": "local Python process only; no browser, no network, no large-model calls",
+ "frozen": {
+  "run.py": "b57aba378745ab07ef0b1e55f39bcaac43ffb703e8a78a25f1e3a4ef8f80a0b8",
+  "screens.py": "8f75143b9a47d54dffde78fa3926ebfc02ab247e69afb39c3dda6b5756e53322",
+  "../../src/simthinkd/router.py": "06ffc0c01f19d7dc89c5c2c484d45c89c2f82663ee8da29817359565e550394d",
+  "../../src/simthinkd/relearn.py": "ac2a9449972ec1a88246379803b4b112c19bda6c0856671067ad9ed70a27bac3",
+  "../../src/simthinkd/adapters.py": "58b538adb984e5bc12d2ce2fa33e94c8deb3b505351fcb2212c4badd83a9594a"
+ },
+ "sealed_utc": "2026-10-25T09:15:46+00:00"
+}

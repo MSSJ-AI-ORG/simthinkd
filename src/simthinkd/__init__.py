@@ -2,12 +2,20 @@
 
     from simthinkd import Decider
     print(Decider("doom-defend").decide("seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25"))
+
+Router kit (0.4.0): Router + SkillTable hand a case over to a large model when the decider is unsure, the state is
+unknown, or the last fast action did not lead to an expected next state; relearn() retrains and hot-swaps.
 """
+from .adapters import PipelineAdapter, ScreenAdapter, VectorAdapter
 from .core import Decider, Decision, available, build_request
+from .relearn import RelearnReport, relearn
+from .router import HandoffMonitor, Route, Router, Skill, SkillTable
 from .score import Score, Scorer
 
-__version__ = '0.3.0'
-__all__ = ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__']
+__version__ = '0.4.0'
+__all__ = ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__',
+           'Router', 'Route', 'Skill', 'SkillTable', 'HandoffMonitor', 'relearn', 'RelearnReport',
+           'ScreenAdapter', 'PipelineAdapter', 'VectorAdapter']
 
 
 def fit(*args, **kwargs):

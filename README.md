@@ -153,6 +153,51 @@ It is not a good fit for:
 - **Answers that are not in the line you give it.** If the answer depends on history the line does not contain, add that history to the line or use a different tool.
 - **Open-ended answers.** It picks from a list or returns one number. It does not write.
 
+## Route between a fast path and a large model
+
+New in 0.4.0 (router kit). A `Router` puts SimThink D in front of a large model. The decider names the current state, a
+skill table gives the scripted action for that state, and the router either does that action or hands the case over.
+
+```python
+from simthinkd import Decider, Router, SkillTable, ScreenAdapter
+
+skills = SkillTable({"LOGIN":   ("FILL_LOGIN", ["PROFILE"]),        # state: (action, expected next states)
+                     "PROFILE": ("SUBMIT", ["ERROR", "DONE"]),
+                     "ERROR":   ("CLOSE", ["PROFILE"]),
+                     "DONE":    ("STOP", None, True)})               # final: the task ends here
+router = Router(Decider("models/screen"), skills, tau=0.9, adapter=ScreenAdapter())
+router.reset(expect=["LOGIN"])
+route = router.route({"pixels": screenshot, "title": "Sign in", "prev": None})
+if route.handoff:
+    action = ask_large_model(screenshot)     # route.reason says why
+else:
+    action = route.action                    # about 2 ms
+```
+
+A route is a hand-over for one of three reasons:
+
+| Reason | When |
+|---|---|
+| `low_confidence` | the decider's confidence is below `tau` |
+| `unknown_state` | the state has no skill in this table |
+| `no_progress` | the state is not one the last fast action was expected to lead to |
+
+The third check matters most. A small model can be sure and wrong on a screen it has never seen. If its action then
+leads somewhere unexpected, or changes nothing, the very next route hands the case over. `SkillTable.from_transitions`
+learns the expected next states from runs of your teacher.
+
+- `HandoffMonitor()` watches the last 10 routes. It fires when half of them were hand-overs, or when 3 were no-progress.
+- `relearn(router, teacher, observations, base_examples)` asks your teacher (a large model or a person) about those
+  cases. It then retrains the decider, swaps it into the running router and appends one line to a log.
+- Adapters turn different inputs into the decider's sentence: `ScreenAdapter` (a colour grid of a screenshot, the window
+  title and the previous action), `PipelineAdapter` (request fields and a gate verdict) and `VectorAdapter` (part of a
+  robot's observation vector). The decider stays the same; only the input changes.
+
+[examples/router_screen](examples/router_screen/) runs all of this on a small synthetic screen task, with no network.
+It includes a sealed preregistration and a template for your own experiments. In our sealed run, 12 of 12 deliberately
+wrong actions were caught at the next screen. After a redesign, 101 teacher labels and 3.7 s of training brought the
+hand-over rate from 41 of 58 routes back to 0 of 96. Details: [docs/ROUTER.md](docs/ROUTER.md).
+
 ## Measure your own model
 
 Does your model fit inside one tick? `simthinkd bench` replays 1,050 recorded Doom states that ship with the package. It times every decision, one request at a time.
