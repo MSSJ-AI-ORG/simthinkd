@@ -10,8 +10,8 @@ Install the package from the repository root and the benchmark dependencies:
 python -m pip install -e '.[train]' pillow websocket-client pytest
 cd benchmarks/screen
 python run.py --app erp --cond decider --seed 502 --reps 3 --out runs/erp
-python run.py --app img --cond decider --seed 601 --reps 3 --out runs/img --llm-cmd 'python model_bridge.py'
-python run.py --app erp --cond llm --seed 502 --reps 3 --out runs/llm --llm-cmd 'python model_bridge.py'
+python run.py --app img --cond decider --seed 601 --reps 3 --out runs/img --llm-cmd '["python", "bridge_codex.py"]'
+python run.py --app erp --cond llm --seed 502 --reps 3 --out runs/llm --llm-cmd '["python", "bridge_codex.py"]'
 python -m pytest -q test_bench_offline.py
 ```
 
@@ -28,8 +28,8 @@ by the scoring oracle.
 The bridge command receives one JSON object on stdin: `schema`, `screenshot`
 (a local PNG filename), `mission`, `previous`, and `actions`. Return only one JSON
 object on stdout: `{"action":"PRESS","label":"Continue"}`, or TYPE with `label`
-and `text`, or `{"action":"WAIT"}` / `{"action":"DONE"}`. A wrapper can call a
-CLI such as `codex exec` and translate its response. The runner does not assume a
+and `text`, or `{"action":"WAIT"}` / `{"action":"DONE"}`. `bridge_codex.py` is a working example that calls
+the Codex CLI the way our v30 runs did and translates its answer. The runner does not assume a
 particular CLI's flags or output. On Windows, a JSON argv array avoids quoting
 ambiguity. Commands run without a shell and have a 180-second timeout. Missing
 `--llm-cmd` skips the llm condition, writes a skip summary, and never starts Chrome.
