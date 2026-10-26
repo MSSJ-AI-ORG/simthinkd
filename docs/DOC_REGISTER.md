@@ -1,4 +1,4 @@
-# Document register: SimThink D 0.4.0 (router kit)
+# Document register: SimThink D 0.5.0 (router kit + screen control)
 
 Form: **agile, light**. Each document type of the six life-cycle stages has one line: the file that stands in for it,
 or "not applicable" with the reason. "Internal" means it exists outside this repository and is not published.
@@ -13,6 +13,7 @@ or "not applicable" with the reason. "Internal" means it exists outside this rep
 | R4 | Feature adapters: screen (pixel grid, window title), pipeline step (request meta, gate verdict), robot (part of an observation vector). The decider is the same; only the input changes. |
 | R5 | A reproducibility test and a preregistration template (PREREG sealed by hash) as a repository example. |
 | R6 | Backward compatibility: the 0.3.0 public API and its tests are unchanged. |
+| R8 | Screen actions (0.5.0): general guards for screen control with no site values inside (no-click bands, open link by address, expected screen after an action, rule first, success from page text); manual docs/SCREEN.md. |
 | R7 | DOM input as an extra or alternative input, and a two-step hybrid (capture decides, DOM verifies). No typed values leak, bounded length, deterministic order. A generic popup rule that closes only popups without a decision. The frozen router.py, relearn.py and adapters.py are not changed (CEO Telegram msg 8916, 8918, 8922). |
 
 ## Requirements traceability (RTM)
@@ -26,6 +27,7 @@ or "not applicable" with the reason. "Internal" means it exists outside this rep
 | R5 | examples/router_screen/README.md | examples/router_screen/: `run.py`, `screens.py`, `seal_prereg.py`, `PREREG_TEMPLATE.json`, `PREREG_router_screen.json` + `.sha256`, `RESULTS_router_screen_v1.json` | tests/test_router_example.py (seal verify, two runs with the same digest, H1-H7) | pass |
 | R6 | CHANGELOG.md 0.4.0 | src/simthinkd/__init__.py (new names added, none removed) | test_router.py: `test_public_api_of_030_is_unchanged`, `test_router_on_a_real_decider_keeps_its_answers`, `test_router_loads_a_decider_by_name`; all 0.3.0 tests unchanged | pass |
 | R7 | docs/ROUTER.md (DOM input) | src/simthinkd/dom_adapter.py: `DomAdapter`, `CombinedAdapter`, `DomVerifier`, `Verdict`, `VerifiedRouter`, `PopupGuard`, `PopupVerdict`, `DOM_SNAPSHOT_JS`, reason `verify_disagree` | tests/test_dom_adapter.py: `test_dom_sentence_form`, `test_dom_order_is_deterministic`, `test_dom_length_is_bounded`, `test_no_typed_values_or_query_leak`, `test_combined_is_the_union`, `test_lookalike_told_apart_only_with_dom` (negative), `test_verifier_fit_and_reasons`, `test_verified_router_hands_over_on_disagreement`, `test_verifier_point_and_per_call_target`, `test_popup_guard` (negatives: popups that ask for a decision), `test_exports`; measured on the v2.1 test app in v28_dom_vs_capture_20261025 (internal) | pass |
+| R8 | docs/SCREEN.md (Guards, loop) | src/simthinkd/screen_actions.py: `NoClickBands`, `open_or_press`, `ExpectAfter`, `RuleFirst`, `PageTextCheck` | tests/test_screen_actions.py (5 tests, each with a planted wrong case) | pass |
 
 ## Register (35 document types)
 

@@ -6,6 +6,7 @@
 Router kit (0.4.0): Router + SkillTable hand a case over to a large model when the decider is unsure, the state is
 unknown, or the last fast action did not lead to an expected next state; relearn() retrains and hot-swaps.
 DOM input: DomAdapter, CombinedAdapter, DomVerifier + VerifiedRouter (capture decides, DOM verifies), PopupGuard.
+Screen actions (0.5.0): NoClickBands, ExpectAfter, open_or_press, RuleFirst, PageTextCheck. See docs/SCREEN.md.
 """
 from .adapters import PipelineAdapter, ScreenAdapter, VectorAdapter
 from .dom_adapter import CombinedAdapter, DomAdapter, DomVerifier, PopupGuard, VerifiedRouter
@@ -15,7 +16,7 @@ from .relearn import RelearnReport, relearn
 from .router import HandoffMonitor, Route, Router, Skill, SkillTable
 from .score import Score, Scorer
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 __all__ = ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__',
            'Router', 'Route', 'Skill', 'SkillTable', 'HandoffMonitor', 'relearn', 'RelearnReport',
            'ScreenAdapter', 'PipelineAdapter', 'VectorAdapter',

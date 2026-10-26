@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.4.0 - unreleased
+## 0.5.0 - unreleased
+
+- Screen actions (`src/simthinkd/screen_actions.py`, new module): general forms of the guards that cut one live screen-control mission from 80.8 s to 29.2 s (12 of 12 runs succeeded; the site code is not published). `NoClickBands` keeps clicks out of fixed header and footer bands that the accessibility tree misses. `open_or_press` opens a plain http(s) link by its address instead of clicking its card. `ExpectAfter` waits for one of the expected screens after an action and reports a miss. `RuleFirst` uses a known rule before asking the decider, and a rule that raises never blocks the fallback. `PageTextCheck` judges success from page text or a counter that grew. Every site value is passed in by the caller. Tests: `tests/test_screen_actions.py`.
+- This release also carries everything listed under 0.4.0 below; 0.4.0 was not published on its own.
+- No change to the 0.3.0 API.
+
+## 0.4.0 - not published on its own (in 0.5.0)
 
 - Router kit. `Router` + `SkillTable`: SimThink D names the state, the skill table gives the scripted action, and the router hands the case over (to a large model or a person) for one of three reasons: `low_confidence`, `unknown_state`, `no_progress`. The no-progress check compares the observed state with the expected next states of the last fast action, so a confident wrong action is caught at the next observation. `SkillTable.from_transitions` learns the expected next states from teacher runs. `Router.reset(expect=...)` checks the first state of an episode too.
 - `HandoffMonitor`: relearning trigger over the last 10 routes (hand-over rate 0.5, or 3 no-progress hand-overs).
