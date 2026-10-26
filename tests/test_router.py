@@ -463,7 +463,7 @@ def test_same_router_different_inputs():
 def test_public_api_of_030_is_unchanged():
     for name in ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__']:
         assert name in simthinkd.__all__ and hasattr(simthinkd, name)
-    assert simthinkd.__version__ == '0.4.0'
+    assert simthinkd.__version__ == '0.5.0'
     d = Decider('doom-defend')
     assert d.decide('seen: Demon left a30 d5 | enemies 1 | sway left | gun ready | ammo25').choice == 'TURN_LEFT'
     assert str(Route('action', 'A', 0.5, 'GO')).startswith('GO [A 50%')
