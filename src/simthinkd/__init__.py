@@ -9,6 +9,7 @@ DOM input: DomAdapter, CombinedAdapter, DomVerifier + VerifiedRouter (capture de
 """
 from .adapters import PipelineAdapter, ScreenAdapter, VectorAdapter
 from .dom_adapter import CombinedAdapter, DomAdapter, DomVerifier, PopupGuard, VerifiedRouter
+from .screen_actions import ExpectAfter, NoClickBands, PageTextCheck, RuleFirst, RuleRoute, open_or_press
 from .core import Decider, Decision, available, build_request
 from .relearn import RelearnReport, relearn
 from .router import HandoffMonitor, Route, Router, Skill, SkillTable
@@ -18,7 +19,8 @@ __version__ = '0.4.0'
 __all__ = ['Decider', 'Decision', 'Score', 'Scorer', 'available', 'build_request', 'fit', 'fit_score', '__version__',
            'Router', 'Route', 'Skill', 'SkillTable', 'HandoffMonitor', 'relearn', 'RelearnReport',
            'ScreenAdapter', 'PipelineAdapter', 'VectorAdapter',
-           'DomAdapter', 'CombinedAdapter', 'DomVerifier', 'VerifiedRouter', 'PopupGuard']
+           'DomAdapter', 'CombinedAdapter', 'DomVerifier', 'VerifiedRouter', 'PopupGuard',
+           'NoClickBands', 'ExpectAfter', 'open_or_press', 'RuleFirst', 'RuleRoute', 'PageTextCheck']
 
 
 def fit(*args, **kwargs):
