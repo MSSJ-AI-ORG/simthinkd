@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Demo HR ERP</title>
+<style>
+/* Demo HR ERP: our own test app for the SimThink D v3.0 demo. All data is synthetic (seeded); no real company or person. */
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1280px;height:768px;overflow:hidden;font-family:"Pretendard","Noto Sans KR","Malgun Gothic",sans-serif;background:#f4f6fa;color:#1c2333;font-size:14px}
+button{font-family:inherit;font-size:14px;cursor:pointer}
+.top{position:absolute;left:0;top:0;width:1280px;height:52px;background:#1e2a4a;color:#fff;display:flex;align-items:center;padding:0 18px;gap:14px}
+.logo{width:30px;height:30px;border-radius:8px;background:#3b6cf6;display:flex;align-items:center;justify-content:center;font-weight:800}
+.brand{font-weight:700;font-size:17px}
+.tag{border:1px solid #5a6a92;border-radius:12px;padding:2px 10px;font-size:12px;color:#cfd8ee}
+.qs{margin-left:20px;width:300px;height:32px;border-radius:8px;background:#2b3a62;color:#9fb0d6;display:flex;align-items:center;padding:0 12px;font-size:13px}
+.me{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px}
+.av{width:30px;height:30px;border-radius:50%;background:#3b6cf6;display:flex;align-items:center;justify-content:center;font-weight:700}
+.nav{position:absolute;left:0;top:52px;width:200px;height:716px;background:#fff;border-right:1px solid #e3e7ef;padding:14px 10px}
+.nav .grp{font-size:11px;color:#8a93a6;margin:12px 8px 6px}
+.nav button{display:flex;width:100%;align-items:center;gap:8px;border:0;background:none;padding:9px 10px;border-radius:8px;color:#2a3245;text-align:left}
+.nav button.on{background:#e8efff;color:#2453d6;font-weight:700}
+.nav .cnt{margin-left:auto;background:#fde8e8;color:#c0392b;border-radius:10px;padding:0 7px;font-size:11px;font-weight:700}
+.main{position:absolute;left:200px;top:52px;width:1080px;height:716px;padding:18px 22px}
+.crumb{font-size:12px;color:#8a93a6}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{font-size:12.5px;color:#6b7488}
+.card{background:#fff;border:1px solid #e3e7ef;border-radius:12px}
+.kpis{display:flex;gap:14px;margin-top:16px}
+.kpi{flex:1;padding:14px 16px;border-top:4px solid #3b6cf6}
+.kpi .n{font-size:28px;font-weight:800;margin-top:6px}
+.kpi .l{font-size:12.5px;color:#6b7488}
+.row2{display:flex;gap:14px;margin-top:14px}
+.row2 .card{flex:1;padding:14px 16px;height:330px}
+.row2 h3{font-size:15px;margin-bottom:10px}
+.li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eef1f6;font-size:13px}
+.tool{display:flex;gap:8px;align-items:center;padding:12px 14px;border-bottom:1px solid #eef1f6}
+.inp{height:34px;border:1px solid #cfd6e4;border-radius:8px;padding:0 10px;font-size:14px;font-family:inherit}
+.btn{height:34px;border-radius:8px;border:1px solid #cfd6e4;background:#fff;padding:0 14px;color:#1c2333}
+.btn.pri{background:#2453d6;border-color:#2453d6;color:#fff;font-weight:700}
+.btn.ok{background:#16803c;border-color:#16803c;color:#fff;font-weight:700}
+.btn.warn{border-color:#d33;color:#c0392b}
+.chip{border:1px solid #9db4f5;background:#eef3ff;color:#2453d6;border-radius:14px;padding:4px 10px;font-size:12.5px}
+table{border-collapse:collapse;width:100%}
+th{font-size:12.5px;color:#5b6478;text-align:left;padding:9px 12px;border-bottom:1px solid #e3e7ef;background:#fafbfd}
+td{font-size:13.5px;padding:0 12px;height:39px;border-bottom:1px solid #eef1f6}
+td .see{height:28px;padding:0 10px;border:1px solid #cfd6e4;background:#fff;border-radius:6px;font-size:12.5px}
+.badge{border-radius:10px;padding:3px 9px;font-size:12px;font-weight:700}
+.b-wait{background:#fff1e0;color:#b45309}.b-ok{background:#e3f6e9;color:#15803d}.b-no{background:#fde8e8;color:#b91c1c}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#16a34a;margin-right:5px}
+.panel{position:absolute;left:845px;top:52px;width:415px;height:640px;padding:18px}
+.pav{width:54px;height:54px;border-radius:50%;background:#3b6cf6;color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.kv{display:flex;padding:9px 0;border-bottom:1px solid #eef1f6;font-size:13.5px}.kv b{width:120px;color:#6b7488;font-weight:500}
+.saved{margin-top:14px;background:#e3f6e9;border:1px solid #9bd8ae;color:#15803d;border-radius:10px;padding:12px 14px;font-weight:700}
+.ov{position:absolute;left:0;top:0;width:1280px;height:768px;background:rgba(15,23,42,.48)}
+.modal{position:absolute;background:#fff;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.mh{display:flex;align-items:center;padding:18px 22px;border-bottom:1px solid #eef1f6;font-size:17px;font-weight:800}
+.x{margin-left:auto;border:0;background:none;font-size:20px;color:#6b7488;width:32px;height:32px}
+.wk{position:absolute;top:430px;width:144px;height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;background:#eef1f6;color:#8a93a6}
+.wk.on{background:#2563eb;color:#fff}
+.step{position:absolute;top:436px;width:52px;height:48px;border:1px solid #cfd6e4;background:#fff;border-radius:10px;font-size:24px;color:#2a3245}
+.fl{position:absolute;font-size:13px;color:#6b7488}
+.done-bar{margin:12px 14px 0;background:#e3f6e9;border:1px solid #9bd8ae;color:#15803d;border-radius:10px;padding:10px 14px;font-weight:700;display:flex;align-items:center}
+</style>
+</head>
+<body>
+<div class="top"><div class="logo">H</div><div class="brand">Demo HR ERP</div><div class="tag">가상 자료</div>
+<div class="qs">⌕ 메뉴·직원 바로 가기</div><div class="me">인사담당 · 데모 계정<div class="av">D</div></div></div>
+<div class="nav" id="nav"></div>
+<div class="main" id="main"></div>
+<div id="layer"></div>
+<script>
+// ---------- seeded synthetic data (no real person or company) ----------
+const Q = new URLSearchParams(location.search);
+const SEED = +(Q.get('seed') || 1), PERT = Q.get('perturb') || 'none';
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R = rng(SEED * 7919 + 13);
+const pick = a => a[Math.floor(R() * a.length)];
+const SUR = '김이박최정강조윤장임한오서신권황안송류홍'.split('');
+const GIV = ['민준','서연','도윤','하은','시우','지유','주원','수아','예준','지아','건우','서윤','현우','채원','우진','지민','유나','태윤'];
+const DEPT = ['인사팀','생산1팀','생산2팀','품질팀','연구소','경영지원팀'];
+const RANK = ['사원','주임','대리','과장','차장','팀장'];
+const names = new Set(); const EMP = [];
+while (EMP.length < 14) { const n = pick(SUR) + pick(GIV); if (names.has(n)) continue; names.add(n);
+  EMP.push({no: 'E' + (2000 + EMP.length * 7 + Math.floor(R() * 5)), name: n, dept: pick(DEPT), rank: pick(RANK),
+            join: (2011 + Math.floor(R() * 14)) + '-' + String(1 + Math.floor(R() * 12)).padStart(2, '0') + '-' + String(1 + Math.floor(R() * 27)).padStart(2, '0'),
+            ext: String(2100 + Math.floor(R() * 800)), site: pick(['본사 3층','본사 5층','2공장','연구동']), wfh: Math.floor(R() * 4), leave: 8 + Math.floor(R() * 10)}); }
+const TGT = EMP[2 + Math.floor(R() * 10)];                 // employee to look up and edit
+const WFH_TO = Math.min(5, TGT.wfh + 1 + Math.floor(R() * 2));
+const REQ_NAME = EMP.filter(e => e !== TGT)[Math.floor(R() * 13)];
+const KINDS = ['출장비','교육비','연차','시간외근무','비품 구매'];
+const REQS = [{id: 1, kind: '연차', who: REQ_NAME.name, dept: REQ_NAME.dept, period: '10-28 (1일)', days: 1, date: '10-20', st: 'wait'}];
+for (let i = 2; i <= 9; i++) { const e = pick(EMP); REQS.push({id: i, kind: pick(KINDS), who: e.name, dept: e.dept, period: '10-' + (21 + Math.floor(R() * 9)),
+  days: 1, date: '10-' + (20 + Math.floor(i / 2)), st: R() < 0.55 ? 'wait' : (R() < 0.6 ? 'ok' : 'no')}); }
+// ---------- state ----------
+const S = {page: 'DASH', q: '', open: null, edit: null, dlg: null, notice: PERT === 'notice', noticeShown: false, savedFor: null, approvedId: null};
+const O = window.__oracle = {state: 'DASH', popup: null, events: [], target: {employee: TGT.name, wfh_from: TGT.wfh, wfh_to: WFH_TO, request: REQ_NAME.name},
+  wfh: {}, requests: {}, presses: []};
+function log(ev){ O.events.push(ev); }
+function press(name){ O.presses.push(name); }
+function h(tag, attrs, ...kids){ const e = document.createElement(tag); for (const k in (attrs || {})) { if (k === 'on') e.onclick = attrs.on; else if (k === 'style') e.style.cssText = attrs.style; else e.setAttribute(k, attrs[k]); }
+  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c)); return e; }
+function B(label, cls, fn, aria){ return h('button', {class: 'btn ' + (cls || ''), 'aria-label': aria || label, on: () => { press(aria || label); fn(); }}, label); }
+// ---------- render ----------
+function nav(){
+  const n = document.getElementById('nav'); n.innerHTML = '';
+  const wait = REQS.filter(r => r.st === 'wait').length;
+  const item = (k, label, icon, extra) => h('button', {class: S.page.startsWith(k) ? 'on' : '', 'aria-label': label, on: () => { press(label); go(k); }}, icon + '  ' + label, extra || null);
+  n.append(h('div', {class: 'grp'}, '홈'), item('DASH', '대시보드', '▣'), h('div', {class: 'grp'}, '인사'), item('EMP', '직원', '◉'), item('ORG', '조직도', '◇'),
+    h('div', {class: 'grp'}, '근태·결재'), item('ATT', '근태·휴가', '▦'), item('APPR', '결재함', '✓', h('span', {class: 'cnt'}, String(wait))),
+    h('div', {class: 'grp'}, '보상·교육'), item('PAY', '급여', '₩'), item('EDU', '교육', '▷'), h('div', {class: 'grp'}, '관리'), item('SET', '설정', '⚙'));
+}
+function go(k){
+  if (k === 'EMP') { S.page = 'EMP'; S.q = ''; S.open = null; }
+  else if (k === 'APPR') { S.page = 'APPR'; S.open = null; if (S.notice && !S.noticeShown) { S.noticeShown = true; S.dlg = 'notice'; log('notice_shown'); } }
+  else if (k === 'DASH') { S.page = 'DASH'; }
+  else { log('other_menu:' + k); }
+  draw();
+}
+function header(crumb, title, sub){ return [h('div', {class: 'crumb'}, crumb), h('h1', null, title), h('div', {class: 'sub'}, sub)]; }
+function dash(m){
+  m.append(...header('홈 / 대시보드', '대시보드', '오늘 기준 인사 현황 · 모든 숫자는 가상 자료입니다'));
+  const k = h('div', {class: 'kpis'});
+  [['재직 인원', EMP.length + 112 + '명', '#3b6cf6'], ['오늘 휴가', (3 + SEED % 5) + '명', '#16a34a'], ['결재 대기', REQS.filter(r => r.st === 'wait').length + '건', '#f59e0b'], ['법정교육 미이수', (4 + SEED % 7) + '명', '#dc2626']]
+    .forEach(([l, n, c]) => k.append(h('div', {class: 'card kpi', style: 'border-top-color:' + c}, h('div', {class: 'l'}, l), h('div', {class: 'n'}, n))));
+  m.append(k);
+  const r = h('div', {class: 'row2'});
+  const a = h('div', {class: 'card'}, h('h3', null, '결재 대기'));
+  REQS.filter(x => x.st === 'wait').slice(0, 6).forEach(x => a.append(h('div', {class: 'li'}, h('span', null, x.kind + ' · ' + x.who), h('span', {class: 'badge b-wait'}, '대기'))));
+  const b = h('div', {class: 'card'}, h('h3', null, '이번 주 일정'));
+  ['10-27 주간 인사 회의', '10-28 신입 교육 (2명)', '10-29 법정교육 마감 알림', '10-30 급여 마감', '10-31 월말 근태 확정'].forEach(t => b.append(h('div', {class: 'li'}, h('span', null, t), h('span', {class: 'sub'}, '예정'))));
+  r.append(a, b); m.append(r);
+}
+function empTable(rows, narrow){
+  const t = h('table', null, h('tr', null, ...['이름', '사번', '부서', '직급', '입사일', narrow ? null : '근무지', '재직', ''].filter(x => x !== null).map(x => h('th', null, x))));
+  rows.forEach(e => t.append(h('tr', null, h('td', null, h('b', null, e.name)), h('td', null, e.no), h('td', null, e.dept), h('td', null, e.rank), h('td', null, e.join),
+    narrow ? null : h('td', null, e.site), h('td', null, h('span', {class: 'dot'}), '재직'),
+    h('td', null, h('button', {class: 'see', 'aria-label': e.name + ' 보기', on: () => { press(e.name + ' 보기'); S.open = e.no; S.page = 'EMP'; draw(); }}, '보기')))));
+  return t;
+}
+function emp(m){
+  const panel = S.open && EMP.find(e => e.no === S.open);
+  m.append(...header('인사 / 직원', '직원', '직원 인적사항 · 줄의 보기를 누르면 오른쪽에 한 사람의 정보가 열립니다'));
+  const card = h('div', {class: 'card', style: 'margin-top:14px;' + (panel ? 'width:615px' : '')});
+  const inp = h('input', {class: 'inp', id: 'q', placeholder: '이름 · 사번으로 찾기', 'aria-label': '이름 · 사번으로 찾기', style: 'width:240px'});
+  inp.value = S.q;
+  const tool = h('div', {class: 'tool'}, inp, B('검색', 'pri', () => { S.q = document.getElementById('q').value.trim(); S.open = null; log('search:' + S.q); draw(); }));
+  if (!panel) tool.append(h('select', {class: 'inp', 'aria-label': '부서'}, h('option', null, '모든 부서'), ...DEPT.map(d => h('option', null, d))), h('span', {class: 'chip'}, '재직만'));
+  if (S.q) tool.append(h('span', {class: 'chip'}, '검색: ' + S.q));
+  card.append(tool);
+  const rows = EMP.filter(e => !S.q || e.name.includes(S.q) || e.no === S.q);
+  card.append(empTable(rows.slice(0, 13), !!panel));
+  card.append(h('div', {class: 'sub', style: 'padding:10px 14px'}, rows.length + '명'));
+  m.append(card);
+  if (panel) {
+    const p = h('div', {class: 'card panel'});
+    p.append(h('div', {style: 'display:flex;gap:14px;align-items:center'}, h('div', {class: 'pav'}, panel.name[0]),
+      h('div', null, h('div', {style: 'font-size:19px;font-weight:800'}, panel.name), h('div', {class: 'sub'}, panel.no + ' · ' + panel.dept + ' · ' + panel.rank)),
+      h('button', {class: 'x', 'aria-label': '닫기', on: () => { press('닫기'); S.open = null; draw(); }}, '✕')));
+    p.append(h('div', {style: 'margin-top:16px'}, ...[['입사일', panel.join], ['내선번호', panel.ext], ['근무지', panel.site], ['재택근무', '주 ' + panel.wfh + '일'], ['남은 연차', panel.leave + '일'], ['법정교육', '3 / 4 이수']]
+      .map(([k, v]) => h('div', {class: 'kv'}, h('b', null, k), v))));
+    p.append(h('div', {style: 'display:flex;gap:8px;margin-top:16px'}, B('수정', 'pri', () => { S.edit = {no: panel.no, wfh: panel.wfh}; S.dlg = 'edit'; log('edit_open'); draw(); }), B('근태 보기', '', () => log('att_view'))));
+    if (S.savedFor === panel.no) p.append(h('div', {class: 'saved'}, '방금 저장했습니다 · 재택근무 주 ' + panel.wfh + '일'));
+    document.getElementById('main').append(p);
+  }
+}
+function appr(m){
+  m.append(...header('결재 / 결재함', '결재함', '열린 결재 전부 · 열기를 누르면 내용과 승인 단추가 나옵니다'));
+  const card = h('div', {class: 'card', style: 'margin-top:14px'});
+  const tabs = h('div', {class: 'tool'}, h('span', {class: 'chip'}, '전체 ' + REQS.length), h('span', {class: 'sub'}, '대기 ' + REQS.filter(r => r.st === 'wait').length), h('span', {class: 'sub'}, '승인 ' + REQS.filter(r => r.st === 'ok').length));
+  card.append(tabs);
+  if (S.approvedId) { const r = REQS.find(x => x.id === S.approvedId);
+    card.append(h('div', {class: 'done-bar'}, r.who + ' 님 ' + r.kind + ' ' + r.days + '일을 승인했습니다', h('button', {class: 'btn', style: 'margin-left:auto', 'aria-label': '되돌리기', on: () => { press('되돌리기'); r.st = 'wait'; S.approvedId = null; log('undo:' + r.id); draw(); }}, '되돌리기'))); }
+  const t = h('table', null, h('tr', null, ...['상태', '종류', '신청자', '부서', '기간', '신청일', ''].map(x => h('th', null, x))));
+  REQS.forEach(r => t.append(h('tr', null, h('td', null, h('span', {class: 'badge ' + {wait: 'b-wait', ok: 'b-ok', no: 'b-no'}[r.st]}, {wait: '대기', ok: '승인', no: '반려'}[r.st])),
+    h('td', null, r.kind), h('td', null, h('b', null, r.who)), h('td', null, r.dept), h('td', null, r.period), h('td', null, r.date),
+    h('td', null, h('button', {class: 'see', 'aria-label': r.who + ' ' + r.kind + ' 열기', on: () => { press(r.who + ' ' + r.kind + ' 열기'); S.open = r.id; S.dlg = 'req'; draw(); }}, '열기')))));
+  card.append(t); m.append(card);
+}
+function blank(m, t){ m.append(...header('메뉴', t, '이 시험용 앱에서는 비어 있는 화면입니다')); }
+function modalEdit(L){
+  const e = EMP.find(x => x.no === S.edit.no);
+  L.append(h('div', {class: 'ov'}));
+  const md = h('div', {class: 'modal', role: 'dialog', 'aria-modal': 'true', style: 'left:150px;top:110px;width:980px;height:560px'});
+  md.append(h('div', {class: 'mh'}, '인사 정보 수정 · ' + e.name, h('button', {class: 'x', 'aria-label': '닫기', on: () => { press('닫기'); S.dlg = null; S.edit = null; draw(); }}, '✕')));
+  md.append(h('div', {class: 'fl', style: 'left:30px;top:96px'}, '내선번호'), h('input', {class: 'inp', 'aria-label': '내선번호', style: 'position:absolute;left:30px;top:118px;width:260px', value: e.ext}));
+  md.append(h('div', {class: 'fl', style: 'left:330px;top:96px'}, '근무지'), h('select', {class: 'inp', 'aria-label': '근무지', style: 'position:absolute;left:330px;top:118px;width:260px'}, ...['본사 3층','본사 5층','2공장','연구동'].map(x => { const o = h('option', null, x); if (x === e.site) o.selected = true; return o; })));
+  md.append(h('div', {class: 'fl', style: 'left:30px;top:200px;font-size:15px;color:#1c2333;font-weight:700'}, '재택근무 요일 수'), h('div', {class: 'fl', style: 'left:30px;top:226px'}, '주 ' + S.edit.wfh + '일 · 늘리기(+) 단추를 누를 때마다 하루씩 늘어납니다'));
+  ['월', '화', '수', '목', '금'].forEach((d, i) => md.append(h('div', {class: 'wk' + (i < S.edit.wfh ? ' on' : ''), style: 'left:' + (18 + 160 * i) + 'px;top:310px'}, d)));
+  md.append(h('button', {class: 'step', 'aria-label': '재택 요일 줄이기', style: 'left:830px;top:316px', on: () => { press('재택 요일 줄이기'); S.edit.wfh = Math.max(0, S.edit.wfh - 1); draw(); }}, '−'));
+  md.append(h('button', {class: 'step', 'aria-label': '재택 요일 늘리기', style: 'left:892px;top:316px', on: () => { press('재택 요일 늘리기'); S.edit.wfh = Math.min(5, S.edit.wfh + 1); draw(); }}, '+'));
+  md.append(h('div', {style: 'position:absolute;right:26px;bottom:24px;display:flex;gap:8px'}, B('취소', '', () => { S.dlg = null; S.edit = null; draw(); }),
+    B('저장', 'pri', () => { e.wfh = S.edit.wfh; O.wfh[e.name] = e.wfh; S.savedFor = e.no; S.dlg = null; S.edit = null; log('saved:' + e.name + ':' + e.wfh); draw(); })));
+  L.append(md);
+}
+function modalReq(L, confirm){
+  const r = REQS.find(x => x.id === S.open);
+  L.append(h('div', {class: 'ov'}));
+  const md = h('div', {class: 'modal', role: 'dialog', 'aria-modal': 'true', style: 'left:290px;top:120px;width:700px;height:500px'});
+  md.append(h('div', {class: 'mh'}, r.kind + ' 신청 · ' + r.who, h('button', {class: 'x', 'aria-label': '닫기', on: () => { press('닫기'); S.dlg = null; draw(); }}, '✕')));
+  md.append(h('div', {style: 'padding:14px 22px'}, ...[['신청자', r.who + ' · ' + r.dept], ['종류', r.kind], ['기간', r.period], ['일수', r.days + '일'], ['사유', '개인 일정'], ['신청일', r.date], ['상태', {wait: '대기', ok: '승인', no: '반려'}[r.st]]]
+    .map(([k, v]) => h('div', {class: 'kv'}, h('b', null, k), v))));
+  if (r.st === 'wait') md.append(h('div', {style: 'position:absolute;right:26px;bottom:24px;display:flex;gap:8px'},
+    B('반려', 'warn', () => { r.st = 'no'; log('rejected:' + r.id); S.dlg = null; draw(); }), B('승인', 'pri', () => { S.dlg = 'confirm'; draw(); })));
+  L.append(md);
+  if (confirm) {
+    L.append(h('div', {class: 'ov', style: 'background:rgba(15,23,42,.30)'}));
+    const c = h('div', {class: 'modal', role: 'alertdialog', 'aria-modal': 'true', style: 'left:440px;top:290px;width:400px;height:190px'});
+    c.append(h('div', {style: 'padding:24px 24px 10px;font-size:16px;font-weight:800'}, '승인할까요?'), h('div', {style: 'padding:0 24px', class: 'sub'}, r.who + ' 님의 ' + r.kind + ' ' + r.days + '일을 승인합니다. 결재함에서 되돌릴 수 있습니다.'));
+    c.append(h('div', {style: 'position:absolute;right:20px;bottom:20px;display:flex;gap:8px'}, B('취소', '', () => { S.dlg = 'req'; draw(); }),
+      B('승인하기', 'ok', () => { r.st = 'ok'; O.requests[r.who + ':' + r.kind] = 'ok'; S.approvedId = r.id; S.dlg = null; log('approved:' + r.id); draw(); })));
+    L.append(c);
+  }
+}
+function modalNotice(L){
+  L.append(h('div', {class: 'ov'}));
+  const md = h('div', {class: 'modal', role: 'dialog', 'aria-modal': 'true', style: 'left:400px;top:210px;width:480px;height:290px;border-top:6px solid #f59e0b'});
+  md.append(h('div', {class: 'mh'}, '⚠ 시스템 점검 안내', h('button', {class: 'x', 'aria-label': '닫기', on: () => { press('닫기'); S.dlg = null; log('notice_closed'); draw(); }}, '✕')));
+  md.append(h('div', {style: 'padding:16px 22px;line-height:1.7'}, '10월 26일(일) 02:00 ~ 04:00 결재 기능 점검이 있습니다.', h('br'), '점검 중에는 결재함을 열 수 없습니다.'));
+  md.append(h('div', {style: 'position:absolute;left:22px;right:22px;bottom:20px;display:flex;gap:8px;align-items:center'},
+    h('button', {class: 'btn', style: 'border:0;color:#6b7488', 'aria-label': '오늘 하루 보지 않기', on: () => { press('오늘 하루 보지 않기'); S.dlg = null; log('notice_never'); draw(); }}, '오늘 하루 보지 않기'),
+    h('button', {class: 'btn', style: 'margin-left:auto;background:#1e2a4a;color:#fff;border-color:#1e2a4a', 'aria-label': '닫기', on: () => { press('닫기'); S.dlg = null; log('notice_closed'); draw(); }}, '닫기')));
+  L.append(md);
+}
+function stateName(){
+  if (S.dlg === 'notice') return 'NOTICE';
+  if (S.dlg === 'edit') return 'EDIT_' + S.edit.wfh;
+  if (S.dlg === 'req') return 'APPR_DETAIL';
+  if (S.dlg === 'confirm') return 'APPR_CONFIRM';
+  if (S.page === 'DASH') return 'DASH';
+  if (S.page === 'APPR') return S.approvedId ? 'APPR_DONE' : 'APPR_LIST';
+  if (S.page === 'EMP') { if (S.open) return S.savedFor === S.open ? 'SAVED' : 'EMP_PANEL'; return S.q ? 'EMP_RESULT' : 'EMP_LIST'; }
+  return 'OTHER';
+}
+const TITLES = {DASH: '대시보드', EMP: '직원', APPR: '결재함'};
+function draw(){
+  nav();
+  const m = document.getElementById('main'); m.innerHTML = '';
+  const L = document.getElementById('layer'); L.innerHTML = '';
+  if (S.page === 'DASH') dash(m); else if (S.page === 'EMP') emp(m); else if (S.page === 'APPR') appr(m); else blank(m, S.page);
+  if (S.dlg === 'edit') modalEdit(L); else if (S.dlg === 'req') modalReq(L, false); else if (S.dlg === 'confirm') modalReq(L, true); else if (S.dlg === 'notice') modalNotice(L);
+  document.title = (TITLES[S.page] || '메뉴') + ' - Demo HR ERP';
+  O.state = stateName(); O.popup = S.dlg === 'notice' ? {kind: 'notice'} : null;
+  const t = REQS.find(r => r.who === REQ_NAME.name && r.kind === '연차');
+  O.success = (TGT.wfh === WFH_TO && O.events.includes('saved:' + TGT.name + ':' + WFH_TO) && t.st === 'ok' &&
+               REQS.filter(r => r !== t && r.st !== r.st0).length === 0 && EMP.filter(e => e !== TGT && e.wfh !== e.wfh0).length === 0);
+}
+REQS.forEach(r => r.st0 = r.st); EMP.forEach(e => e.wfh0 = e.wfh);
+draw();
+</script>
+</body>
+</html>

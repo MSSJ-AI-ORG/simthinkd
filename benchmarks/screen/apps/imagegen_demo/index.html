@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create - Demo Image Studio</title>
+<style>
+/* Demo Image Studio: our own unbranded test app for the SimThink D v3.0 demo. Generation returns local placeholder images (no paid API). */
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1280px;height:768px;overflow:hidden;background:#0f1117;color:#e7e9f0;font-family:"Inter","Pretendard","Segoe UI",sans-serif;font-size:14px}
+button,textarea,input{font-family:inherit;font-size:14px}
+button{cursor:pointer}
+.top{position:absolute;left:0;top:0;width:1280px;height:56px;border-bottom:1px solid #222634;display:flex;align-items:center;padding:0 20px;gap:22px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:16px}.logo i{width:22px;height:22px;background:#7c5cff;transform:rotate(45deg);border-radius:4px;display:block}
+.tn{color:#9aa1b5;font-size:14px}.tn.on{color:#fff;font-weight:700}
+.cr{margin-left:auto;border:1px solid #2c3142;border-radius:16px;padding:5px 12px;color:#cfd3e0;font-size:13px}
+.av{width:30px;height:30px;border-radius:50%;background:#2c3142;display:flex;align-items:center;justify-content:center;font-weight:700}
+.left{position:absolute;left:0;top:56px;width:400px;height:712px;background:#161922;border-right:1px solid #222634;padding:18px 20px}
+.lab{font-size:12.5px;color:#9aa1b5;margin:0 0 7px;font-weight:600;letter-spacing:.02em}
+textarea{width:360px;height:108px;resize:none;background:#0f1117;color:#e7e9f0;border:1px solid #2c3142;border-radius:10px;padding:10px 12px;line-height:1.5}
+.dd{width:360px;height:40px;background:#0f1117;border:1px solid #2c3142;border-radius:10px;color:#e7e9f0;text-align:left;padding:0 12px;display:flex;align-items:center}
+.dd span{margin-left:auto;color:#9aa1b5}
+.menu{position:absolute;left:20px;top:256px;width:360px;background:#232838;border:1px solid #3a4057;border-radius:10px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.menu button{display:block;width:100%;height:40px;text-align:left;padding:0 12px;border:0;border-radius:8px;background:none;color:#e7e9f0}
+.menu button.cur{background:#2f3550}
+.seg{display:flex;gap:8px}
+.seg button{width:84px;height:40px;border-radius:10px;border:1px solid #2c3142;background:#0f1117;color:#cfd3e0}
+.seg button.on{background:#7c5cff;border-color:#7c5cff;color:#fff;font-weight:700}
+.stp{display:flex;align-items:center;gap:10px}
+.stp button{width:44px;height:40px;border-radius:10px;border:1px solid #2c3142;background:#0f1117;color:#e7e9f0;font-size:20px}
+.stp b{width:60px;text-align:center;font-size:18px}
+.adv{width:360px;height:38px;border:0;background:none;color:#cfd3e0;text-align:left;display:flex;align-items:center;font-weight:600;border-top:1px solid #2c3142;padding-top:4px}
+.adv span{margin-left:auto}
+.inp{width:170px;height:36px;background:#0f1117;border:1px solid #2c3142;border-radius:8px;color:#e7e9f0;padding:0 10px}
+.gen{position:absolute;left:20px;bottom:22px;width:360px;height:52px;border:0;border-radius:12px;background:#7c5cff;color:#fff;font-weight:800;font-size:16px}
+.gen[disabled]{background:#3a3560;color:#a9a3d6}
+.right{position:absolute;left:400px;top:56px;width:880px;height:712px;padding:16px 20px}
+.slot{position:absolute;width:410px;height:308px;border-radius:12px;border:2px dashed #262a38;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.slot.fill{border:0;background:#3d3480}
+.frame{background:#4a40a0;border-radius:6px}
+.slot img{width:100%;height:100%;object-fit:cover}
+.prog{position:absolute;left:105px;top:124px;width:200px;background:#161922;border-radius:10px;padding:12px;text-align:center;font-size:13px}
+.bar{height:6px;background:#2c3142;border-radius:3px;margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:#a78bfa}
+.dl{position:absolute;right:10px;bottom:10px;height:34px;border:0;border-radius:9px;background:rgba(15,17,23,.85);color:#fff;padding:0 12px;font-weight:700}
+.okb{position:absolute;left:10px;top:10px;background:#16a34a;color:#fff;border-radius:8px;padding:5px 10px;font-weight:700;font-size:13px}
+.toast{position:absolute;right:24px;top:72px;background:#16a34a;color:#fff;border-radius:10px;padding:10px 16px;font-weight:700}
+.cookie{position:absolute;left:0;top:676px;width:1280px;height:92px;background:#f3f4f7;color:#1c2333;display:flex;align-items:center;padding:0 28px;gap:12px}
+.cookie p{font-size:13.5px;max-width:640px;line-height:1.5}
+.cb{height:38px;border-radius:9px;padding:0 16px;border:1px solid #c9cdd8;background:#fff;color:#1c2333;font-weight:600}
+.cb.pri{background:#1c2333;color:#fff;border-color:#1c2333}
+.ov{position:absolute;left:0;top:0;width:1280px;height:768px;background:rgba(0,0,0,.6)}
+.modal{position:absolute;left:400px;top:230px;width:480px;height:270px;background:#1d2130;border:1px solid #3a4057;border-radius:16px;padding:24px}
+.modal h2{font-size:19px;margin-bottom:10px}
+.modal p{color:#b7bccb;line-height:1.6}
+.mb{position:absolute;right:24px;bottom:22px;display:flex;gap:10px}
+.mb button{height:42px;border-radius:10px;padding:0 18px;font-weight:700}
+</style>
+</head>
+<body>
+<div class="top"><div class="logo"><i></i>Demo Image Studio</div><div class="tn on">Create</div><div class="tn">Gallery</div><div class="tn">Pricing</div>
+<div class="cr" id="cr">◎ 10 credits</div><div class="av">D</div></div>
+<div class="left" id="left"></div>
+<div class="right" id="right"></div>
+<div id="layer"></div>
+<script>
+const Q = new URLSearchParams(location.search);
+const SEED = +(Q.get('seed') || 1), PERT = Q.get('perturb') || 'none';
+const STYLES = ['Auto', 'Photoreal', 'Watercolor', 'Anime', '3D Render'];
+const RATIOS = ['1:1', '16:9', '9:16', '4:3'];
+const S = {prompt: '', style: 'Auto', styleSet: false, menu: false, ratio: '1:1', ratioSet: false, count: 1, adv: false, advOpened: false,
+           cookie: true, credits: false, gen: null, results: null, downloaded: [], creditsLeft: 10, pctAt: 0};
+const O = window.__oracle = {state: 'COOKIE', popup: null, events: [], presses: [], generated: null, downloaded: [], success: false};
+const log = e => O.events.push(e), press = n => O.presses.push(n);
+function h(tag, attrs, ...kids){ const e = document.createElement(tag); for (const k in (attrs || {})) { if (k === 'on') e.onclick = attrs.on; else if (k === 'style') e.style.cssText = attrs.style; else e.setAttribute(k, attrs[k]); }
+  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c)); return e; }
+function B(label, attrs, fn){ const a = Object.assign({'aria-label': label}, attrs || {}); a.on = () => { press(a['aria-label']); fn(); }; return h('button', a, label); }
+function startGen(){
+  S.gen = {t0: performance.now(), params: {prompt: S.prompt.trim(), style: S.style, ratio: S.ratio, count: S.count, adv: S.advOpened}};
+  S.creditsLeft -= 2 * S.count; log('generate'); draw();
+  const tick = () => { if (!S.gen) return; const p = Math.min(100, (performance.now() - S.gen.t0) / 24); if (p >= 100) { S.results = S.gen.params; O.generated = S.gen.params; S.gen = null; log('results'); draw(); }
+    else { const el = document.querySelectorAll('.bar i'); el.forEach(x => x.style.width = p + '%'); document.querySelectorAll('.pct').forEach(x => x.textContent = Math.floor(p) + '%'); setTimeout(tick, 100); } };
+  setTimeout(tick, 100);
+}
+function left(){
+  const L = document.getElementById('left'); L.innerHTML = '';
+  const ta = h('textarea', {id: 'prompt', 'aria-label': 'Prompt', placeholder: 'Describe the image you want…'}); ta.value = S.prompt;
+  ta.oninput = () => { S.prompt = ta.value; O.state = stateName(); };
+  L.append(h('div', {class: 'lab'}, 'PROMPT'), ta);
+  L.append(h('div', {class: 'lab', style: 'margin-top:14px'}, 'STYLE'), h('button', {class: 'dd', 'aria-label': 'Style', on: () => { press('Style'); S.prompt = document.getElementById('prompt').value; S.menu = !S.menu; draw(); }}, S.style, h('span', null, '▾')));
+  L.append(h('div', {class: 'lab', style: 'margin-top:16px'}, 'ASPECT RATIO'));
+  L.append(h('div', {class: 'seg'}, ...RATIOS.map(r => B(r, {class: S.ratio === r ? 'on' : '', 'aria-label': 'Aspect ' + r}, () => { S.ratio = r; S.ratioSet = true; draw(); }))));
+  L.append(h('div', {class: 'lab', style: 'margin-top:16px'}, 'NUMBER OF IMAGES'));
+  L.append(h('div', {class: 'stp'}, B('−', {'aria-label': 'Decrease image count'}, () => { S.count = Math.max(1, S.count - 1); draw(); }), h('b', null, String(S.count)),
+    B('+', {'aria-label': 'Increase image count'}, () => { S.count = Math.min(4, S.count + 1); draw(); }), h('span', {style: 'color:#9aa1b5;font-size:12.5px'}, '2 credits per image')));
+  L.append(h('div', {style: 'height:14px'}), h('button', {class: 'adv', 'aria-label': 'Advanced options', on: () => { press('Advanced options'); S.adv = !S.adv; if (S.adv) S.advOpened = true; draw(); }}, 'Advanced options', h('span', null, S.adv ? '▴' : '▾')));
+  if (S.adv) {
+    L.append(h('div', {style: 'display:flex;gap:16px;margin-top:8px'}, h('div', null, h('div', {class: 'lab'}, 'SEED'), h('input', {class: 'inp', 'aria-label': 'Seed', placeholder: 'Random'})),
+      h('div', null, h('div', {class: 'lab'}, 'GUIDANCE'), h('input', {type: 'range', 'aria-label': 'Guidance', min: 1, max: 20, value: 7, style: 'width:170px;margin-top:10px'}))));
+    L.append(h('div', {class: 'lab', style: 'margin-top:12px'}, 'NEGATIVE PROMPT'), h('input', {class: 'inp', style: 'width:360px', 'aria-label': 'Negative prompt', placeholder: 'What to leave out'}));
+  }
+  const g = B(S.gen ? 'Generating…' : 'Generate ✦', {class: 'gen', 'aria-label': 'Generate'}, () => {
+    S.prompt = document.getElementById('prompt').value;
+    if (!S.prompt.trim()) { log('generate_empty'); return; }
+    if (PERT === 'credits' && !S.creditsSeen) { S.creditsSeen = true; S.credits = true; log('credits_shown'); draw(); return; }
+    startGen(); });
+  if (S.gen) g.setAttribute('disabled', '');
+  L.append(g);
+}
+const SLOTS = [[20, 54], [440, 54], [20, 378], [440, 378]];
+function frameSize(r){ const [a, b] = r.split(':').map(Number); const W = 370, H = 268; return a / b > W / H ? [W, Math.round(W * b / a)] : [Math.round(H * a / b), H]; }
+function right(){
+  const R = document.getElementById('right'); R.innerHTML = '';
+  R.append(h('div', {style: 'font-weight:700;font-size:15px'}, S.results ? 'Results' : 'Preview'), h('div', {style: 'color:#7d8499;font-size:12.5px;margin-top:2px'}, S.results ? (S.results.count + ' images · ' + S.results.style + ' · ' + S.results.ratio) : 'Your images will appear here'));
+  const p = S.results || S.gen && S.gen.params;
+  const n = p ? p.count : S.count, ratio = p ? p.ratio : S.ratio;
+  SLOTS.forEach(([x, y], i) => {
+    const filled = i < n;
+    const s = h('div', {class: 'slot' + (filled ? ' fill' : ''), style: 'left:' + (x + 20) + 'px;top:' + (y + 16) + 'px'});
+    if (filled && S.results) {
+      const st = S.results.style.replace(' ', '').toLowerCase();
+      s.append(h('img', {src: 'img/' + st + '_' + (1 + ((i + SEED) % 4)) + '.jpg', alt: 'Generated image ' + (i + 1)}));
+      s.append(B('⤓ Download', {class: 'dl', 'aria-label': 'Download image ' + (i + 1)}, () => { S.downloaded.push(i + 1); O.downloaded = S.downloaded.slice(); log('download:' + (i + 1)); draw(); }));
+      if (S.downloaded.includes(i + 1)) s.append(h('div', {class: 'okb'}, '✓ Downloaded'));
+    } else if (filled) {
+      const [w, hh] = frameSize(ratio); s.append(h('div', {class: 'frame', style: 'width:' + w + 'px;height:' + hh + 'px'}));
+      if (S.gen) s.append(h('div', {class: 'prog'}, 'Generating… ', h('span', {class: 'pct'}, '0%'), h('div', {class: 'bar'}, h('i', {style: 'width:0%'}))));
+    }
+    R.append(s);
+  });
+  if (S.gen) R.append(B('Cancel', {style: 'position:absolute;right:22px;top:14px;height:32px;border-radius:8px;border:1px solid #3a4057;background:#161922;color:#e7e9f0;padding:0 14px'}, () => { S.gen = null; log('cancel'); draw(); }));
+  if (S.downloaded.length) R.append(h('div', {class: 'toast', style: 'top:10px'}, 'image_' + S.downloaded[S.downloaded.length - 1] + '.png downloaded'));
+}
+function layer(){
+  const L = document.getElementById('layer'); L.innerHTML = '';
+  if (S.menu) { L.append(h('div', {class: 'menu', role: 'listbox', 'aria-label': 'Style options'}, ...STYLES.map(st => h('button', {role: 'option', class: st === S.style ? 'cur' : '', 'aria-label': st,
+      on: () => { press(st); S.style = st; S.styleSet = true; S.menu = false; draw(); }}, st)))); }
+  if (S.cookie) L.append(h('div', {class: 'cookie', role: 'dialog', 'aria-label': 'Cookie notice'}, h('p', null, 'We use cookies to keep you signed in and to understand how the studio is used. You can accept all cookies or keep only the essential ones.'),
+    h('div', {style: 'margin-left:auto;display:flex;gap:10px'}, B('Settings', {class: 'cb'}, () => log('cookie_settings')), B('Essential only', {class: 'cb'}, () => { S.cookie = false; log('cookie_essential'); draw(); }),
+      B('Accept all', {class: 'cb pri'}, () => { S.cookie = false; log('cookie_all'); draw(); }))));
+  if (S.credits) { L.append(h('div', {class: 'ov'}));
+    L.append(h('div', {class: 'modal', role: 'dialog', 'aria-modal': 'true'}, h('h2', null, 'Credits running low'), h('p', null, S.count + ' images use ' + (2 * S.count) + ' credits. You have ' + S.creditsLeft + ' credits left. Top up now to keep creating without interruption.'),
+      h('div', {class: 'mb'}, B('Buy credits', {style: 'border:0;background:#7c5cff;color:#fff'}, () => { log('buy_credits'); }), B('Continue', {style: 'border:1px solid #3a4057;background:#161922;color:#e7e9f0'}, () => { S.credits = false; log('credits_continue'); startGen(); })))); }
+}
+function stateName(){
+  if (S.cookie) return 'COOKIE';
+  if (S.credits) return 'CREDITS';
+  if (S.menu) return 'STYLE_MENU';
+  if (S.downloaded.length) return 'DOWNLOADED';
+  if (S.results) return 'RESULTS';
+  if (S.gen) return 'GENERATING';
+  if (S.adv) return 'ADV_OPEN';
+  if (S.ratioSet) return 'COUNT_' + S.count;
+  if (S.styleSet) return 'FORM_STYLE';
+  return S.prompt.trim() ? 'FORM_PROMPT' : 'FORM_EMPTY';
+}
+function draw(){
+  left(); right(); layer();
+  document.getElementById('cr').textContent = '◎ ' + S.creditsLeft + ' credits';
+  document.title = (S.results ? 'Results' : 'Create') + ' - Demo Image Studio';
+  O.state = stateName(); O.popup = S.credits ? {kind: 'credits'} : null;
+  const want = window.__want;
+  O.success = !!(want && O.generated && O.generated.prompt === want.prompt && O.generated.style === want.style && O.generated.ratio === want.ratio &&
+    O.generated.count === want.count && O.generated.adv && O.downloaded.length === 1 && O.downloaded[0] === want.download && !O.events.includes('buy_credits'));
+}
+draw();
+</script>
+</body>
+</html>

@@ -1,6 +1,4 @@
 """Screen actions: each guard blocks the case it exists for, and a planted wrong case is caught."""
-import pytest
-
 from simthinkd import ExpectAfter, NoClickBands, PageTextCheck, RuleFirst, open_or_press
 
 
@@ -9,8 +7,11 @@ def test_bands_block_header_and_footer_only():
     assert not b.allows((640, 100)) and not b.allows((640, 960)) and b.allows((640, 500))
     assert b.visible_part({'x': 0, 'y': 300, 'w': 100, 'h': 100}) == (50.0, 372.5)  # only the part below the header
     assert b.visible_part({'x': 0, 'y': 0, 'w': 100, 'h': 300}) is None             # wholly under the header
-    with pytest.raises(ValueError):
+    try:
         NoClickBands(top=-1)
+        raise AssertionError('negative band accepted')
+    except ValueError:
+        pass
 
 
 def test_open_link_by_address_else_press():
@@ -48,5 +49,16 @@ def test_page_text_words_and_counter():
     c.begin('cart:1')
     assert c.done('... ADDED   to cart ...') and c.done('cart:2')
     assert not c.done('cart:1')                                         # planted: same count is not success
-    with pytest.raises(ValueError):
+    try:
         PageTextCheck()
+        raise AssertionError('empty check accepted')
+    except ValueError:
+        pass
+
+
+CASES = [v for k, v in sorted(globals().items()) if k.startswith('test_') and callable(v)]
+
+if __name__ == '__main__':
+    for f in CASES:
+        f()
+    print(f'screen actions tests: {len(CASES)} passed')
