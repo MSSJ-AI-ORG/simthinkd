@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <a href="README.ko.md">한국어</a> | <b>日本語</b></p>
 
-<!-- source-sha256: defa99cb8ecbe2e437e2158c53b35d9366776e67f66d146cffe2cf1524f3ce22 -->
+<!-- source-sha256: 0d8ed72622e2e8e4435a10de7e5ceef6a3f5b745c19aee673ba6fde4693469c8 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: クラウドでの判断を代替するローカルバックアップ" width="100%"></p>
 
@@ -157,6 +157,42 @@ print(s.score("part: defect dent | severity severe | image clear | belt fast | r
 - **入力した 1 行だけでは決まらない答え**: 答えがその行にない履歴に左右されるなら、その履歴を行に加えるか、別の手法を使用してください。
 - **自由形式の出力**: リストから選ぶか数値を 1 つ返すだけで、文章は生成しません。
 
+## 高速な処理と大規模モデルを振り分ける
+
+0.4.0 の新機能（ルーターキット）です。`Router` は、大規模モデルの前段に SimThink D を置きます。判断器が現在の状態を特定すると、スキルテーブルがその状態に対応するスクリプトの行動を示し、ルーターはその行動を実行するか、処理を引き継ぎます。
+
+```python
+from simthinkd import Decider, Router, SkillTable, ScreenAdapter
+
+skills = SkillTable({"LOGIN":   ("FILL_LOGIN", ["PROFILE"]),        # state: (action, expected next states)
+                     "PROFILE": ("SUBMIT", ["ERROR", "DONE"]),
+                     "ERROR":   ("CLOSE", ["PROFILE"]),
+                     "DONE":    ("STOP", None, True)})               # final: the task ends here
+router = Router(Decider("models/screen"), skills, tau=0.9, adapter=ScreenAdapter())
+router.reset(expect=["LOGIN"])
+route = router.route({"pixels": screenshot, "title": "Sign in", "prev": None})
+if route.handoff:
+    action = ask_large_model(screenshot)     # route.reason says why
+else:
+    action = route.action                    # about 2 ms
+```
+
+次の 3 つの理由のいずれかに当てはまると、処理を引き継ぎます。
+
+| 理由 | 条件 |
+|---|---|
+| `low_confidence` | 判断器の信頼度が `tau` を下回る |
+| `unknown_state` | その状態に対応するスキルがテーブルにない |
+| `no_progress` | 現在の状態が、直前の高速な処理の行動で予想された次の状態に含まれない |
+
+特に重要なのは 3 番目のチェックです。小さなモデルは、見たことのない画面で自信を持って間違えることがあります。その行動が予想外の結果につながったり、何も変化させなかったりすると、次のルーティングで直ちに処理を引き継ぎます。`SkillTable.from_transitions` は、教師の実行記録から、予想される次の状態を学びます。
+
+- `HandoffMonitor()` は直近 10 回のルーティングを監視します。その半分で処理を引き継いだ場合、または進展がない場合が 3 回あったときに作動します。
+- `relearn(router, teacher, observations, base_examples)` は、そのようなケースについて教師（大規模モデルまたは人）に尋ねます。その後、判断器を再学習し、実行中のルーターの判断器を入れ替え、ログに 1 行追記します。
+- アダプターは、異なる入力を判断器が読む文に変換します。`ScreenAdapter` はスクリーンショットの色のグリッド、ウィンドウのタイトル、直前の行動を、`PipelineAdapter` はリクエストの項目とゲートの判定を、`VectorAdapter` はロボットの観測ベクトルの一部を使います。判断器はそのままで、入力だけが変わります。
+
+[examples/router_screen](examples/router_screen/) は、ネットワークを使わず、小さな模擬画面のタスクでこの一連の処理を実行します。変更できないように固定した事前登録文書と、自分で実験するためのテンプレートも含まれています。条件を固定した実行では、意図的に誤らせた行動 12 件のうち 12 件を次の画面で検出しました。画面のデザインを変更した後、教師のラベル 101 件と 3.7 秒の学習で、処理を引き継ぐ割合はルーティング 58 回中 41 回から 96 回中 0 回に下がりました。詳細: [docs/ROUTER.md](docs/ROUTER.md)。
+
 ## 自分のモデルを測る
 
 あなたのモデルは 1 ティック以内に答えますか。`simthinkd bench` はパッケージに同梱された記録済みの Doom の状態 1,050 個を順に入力し、リクエストを 1 つずつ送って判断ごとの時間を測ります。
@@ -185,9 +221,9 @@ simthinkd bench --url http://127.0.0.1:8000/v1/systemone --name my-model --tick-
 | SimThink D | 265,665 | 1.8 ms | 100% | 0.1% |
 | Laya（公開されたまま） | 約 421M | 365 ms | 0% | 84.2% |
 
-### 既存の環境から使う
-
 SimThink D は教師が知っていることしか知りません。推論はせず、長い文章は読まず、学習なしに新しい行動は扱えません。この比較を自分で試すには [benchmarks/](benchmarks/) を見てください。
+
+## 既存の環境から使う
 
 | どこで | どうやって |
 |---|---|

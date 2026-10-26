@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <b>한국어</b> | <a href="README.ja.md">日本語</a></p>
 
-<!-- source-sha256: defa99cb8ecbe2e437e2158c53b35d9366776e67f66d146cffe2cf1524f3ce22 -->
+<!-- source-sha256: 0d8ed72622e2e8e4435a10de7e5ceef6a3f5b745c19aee673ba6fde4693469c8 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: 클라우드 판단을 대신하는 로컬 백업" width="100%"></p>
 
@@ -158,6 +158,42 @@ SimThink D는 대개 더 큰 시스템의 일부로 사용할 때 가장 효과�
 - **입력한 한 줄에 없는 정보가 필요한 판단**: 판단이 그 줄에 없는 이력 등 정보에 달려 있다면, 그 정보를 줄에 넣거나 다른 도구를 쓰세요.
 - **자유 형식의 답변**: 목록에서 고르거나 숫자 하나를 돌려줄 뿐, 글을 쓰지는 않습니다.
 
+## 빠른 처리와 큰 모델 사이에서 작업 나누기
+
+0.4.0의 새 기능(라우터 키트)입니다. `Router`는 큰 모델 앞에서 SimThink D가 먼저 판단하도록 합니다. 판단기가 현재 상태를 식별하면 스킬 테이블이 그 상태에 해당하는 스크립트 행동을 알려 주고, 라우터는 그 행동을 실행하거나 처리를 넘깁니다.
+
+```python
+from simthinkd import Decider, Router, SkillTable, ScreenAdapter
+
+skills = SkillTable({"LOGIN":   ("FILL_LOGIN", ["PROFILE"]),        # state: (action, expected next states)
+                     "PROFILE": ("SUBMIT", ["ERROR", "DONE"]),
+                     "ERROR":   ("CLOSE", ["PROFILE"]),
+                     "DONE":    ("STOP", None, True)})               # final: the task ends here
+router = Router(Decider("models/screen"), skills, tau=0.9, adapter=ScreenAdapter())
+router.reset(expect=["LOGIN"])
+route = router.route({"pixels": screenshot, "title": "Sign in", "prev": None})
+if route.handoff:
+    action = ask_large_model(screenshot)     # route.reason says why
+else:
+    action = route.action                    # about 2 ms
+```
+
+다음 세 가지 이유 중 하나에 해당하면 처리를 넘깁니다.
+
+| 이유 | 조건 |
+|---|---|
+| `low_confidence` | 판단기의 신뢰도가 `tau`보다 낮음 |
+| `unknown_state` | 해당 상태의 스킬이 테이블에 없음 |
+| `no_progress` | 현재 상태가 직전의 빠른 처리 행동으로 예상한 다음 상태에 해당하지 않음 |
+
+세 번째 검사가 가장 중요합니다. 작은 모델은 처음 보는 화면에서 확신을 갖고 틀릴 수 있습니다. 그 행동이 예상과 다른 결과로 이어지거나 아무 변화도 일으키지 않으면, 바로 다음 라우팅에서 처리를 넘깁니다. `SkillTable.from_transitions`는 교사의 실행 기록에서 예상되는 다음 상태를 배웁니다.
+
+- `HandoffMonitor()`는 최근 10회의 라우팅을 살펴봅니다. 그중 절반에서 처리를 넘겼거나 진행이 없는 경우가 3회이면 작동합니다.
+- `relearn(router, teacher, observations, base_examples)`는 그런 경우를 교사(큰 모델이나 사람)에게 묻습니다. 이어서 판단기를 다시 학습시키고, 실행 중인 라우터의 판단기를 교체한 뒤 로그에 한 줄을 추가합니다.
+- 어댑터는 서로 다른 입력을 판단기가 읽는 문장으로 바꿉니다. `ScreenAdapter`는 스크린샷의 색상 격자·창 제목·이전 행동을, `PipelineAdapter`는 요청 항목과 게이트 판정을, `VectorAdapter`는 로봇 관측 벡터의 일부를 사용합니다. 판단기는 그대로이고 입력만 달라집니다.
+
+[examples/router_screen](examples/router_screen/)은 네트워크 없이 작은 모의 화면 작업에서 이 과정을 모두 실행합니다. 변경할 수 없도록 고정한 사전등록 문서와 직접 실험할 때 쓸 템플릿도 포함되어 있습니다. 조건을 고정한 실행에서는 의도적으로 잘못된 행동 12개 중 12개를 다음 화면에서 잡아냈습니다. 화면 디자인을 바꾼 뒤에는 교사 라벨 101개와 3.7초의 학습으로, 처리를 넘기는 비율이 라우팅 58회 중 41회에서 96회 중 0회로 내려갔습니다. 자세한 내용: [docs/ROUTER.md](docs/ROUTER.md).
+
 ## 내 모델의 판단 시간 측정하기
 
 여러분의 모델은 한 틱 안에 판단을 마치나요? `simthinkd bench`는 패키지에 들어 있는 Doom 기록 상태 1,050개를 다시 돌리며, 요청을 하나씩 보내 판단마다 시간을 잽니다.
@@ -179,7 +215,7 @@ simthinkd bench --url http://127.0.0.1:8000/v1/systemone --name my-model --tick-
 
 **먼저 읽어 주세요.** Laya는 범용 모델이고 이 게임으로 학습하지 않았습니다. 공개된 속도인 질문당 약 33 ms는 GPU 기준입니다. 우리에게는 CPU만 있었습니다. 그래서 이 표는 실시간 루프 안에서의 시간을 비교합니다. 전체 품질을 비교하는 것이 아닙니다.
 
-워크스테이션 CPU 하나(6스레드)와 Doom 상태 1,050개를 썼고, 이어서 같은 시드로 실제 게임 10판을 돌렸습니다. "놓친 틱"은 판단기가 답하기 전에 지나가 버린 틱입니다.
+워크스테이션 CPU 하나(6스레드)와 Doom 상태 1,050개를 썼고, 이어서 같은 시드로 실제 게임 10번을 돌렸습니다. "놓친 틱"은 판단기가 답하기 전에 지나가 버린 틱입니다.
 
 | 판단기 | 파라미터 | 판단 시간 중앙값 | 한 틱(28.6 ms) 안에 끝난 판단 | 실제 게임에서 놓친 틱 |
 |---|---|---|---|---|
