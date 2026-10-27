@@ -46,7 +46,8 @@ python run.py --app img --cond llm     --seed 601 --reps 3 --out runs/img_llm --
 
 Each run writes `SUMMARY.json` and one timing file per repetition. Seeds, conditions and order are the ones we sealed
 before measuring. Times depend on your machine and on the large model's response time; success counts and large-model
-calls are the parts to compare. The live shopping-site figures in SCREEN.md are not reproducible from this repository:
+calls are the parts to compare. Missions, plans and app files are the same on every run, but teacher screenshots are
+rendered fresh each time, so the trained screen decider can differ by bytes between two runs. The live shopping-site figures in SCREEN.md are not reproducible from this repository:
 that code is not published.
 
 ## What is not in this repository yet
