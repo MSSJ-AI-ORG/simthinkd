@@ -384,6 +384,11 @@ def do_llm_action(tab, ans):
     if e is None:
         time.sleep(SETTLE)
         return f'{ans[0]}:{label}', 0, 'label_not_found'
+    # The model's word can resolve to a different control ("credits" -> "Buy credits"): check every name of the
+    # resolved control too, before pressing or typing.
+    if any(IRREVERSIBLE.search(n or '') for n in [e.get('name')] + list(e.get('names') or [])):
+        time.sleep(SETTLE)
+        return f'BLOCKED:{e.get("name") or label}', 0, 'irreversible_blocked'
     tab.click(int(e['cx']), int(e['cy']))
     n = 1
     if ans[0] == 'TYPE':

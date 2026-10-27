@@ -229,6 +229,34 @@ def test_exports():
         assert name in simthinkd.__all__ and hasattr(simthinkd, name)
 
 
+def test_popup_guard_sees_a_covered_decision_control():
+    # review 0.5.0 F2: a partly covered Pay button was ignored, and the popup was closed automatically
+    snap = {'elements': [el('button', 'Close', dialog=1), el('button', 'Pay', covered=True, dialog=1)]}
+    g = PopupGuard().check(snap)
+    assert not g.ok and g.reason == 'decision_needed' and 'Pay' in g.others
+    only_covered_close = {'elements': [el('button', 'Close', covered=True, dialog=1)]}
+    assert not PopupGuard().check(only_covered_close).ok   # a covered close control is not pressed either
+
+
+def test_snapshot_never_reads_typed_text_of_an_editable_element():
+    # review 0.5.0 F3: the text a person typed into a contenteditable box became the element's name
+    import shutil, subprocess
+    if not shutil.which('node'):
+        print('skip: node not found'); return
+    fake = """const e={tagName:'DIV',innerText:'typed_private_marker',isContentEditable:true,disabled:false,
+      querySelector:()=>null,getAttribute:k=>({tabindex:'0',contenteditable:'true'})[k]||null,
+      getBoundingClientRect:()=>({width:100,height:30,right:100,bottom:30,left:0,top:0}),closest:()=>null,contains:()=>false};
+      global.window={innerWidth:800,innerHeight:600};global.innerWidth=800;global.innerHeight=600;global.location={pathname:'/'};
+      global.performance={now:()=>0};
+      global.getComputedStyle=()=>({visibility:'visible',display:'block',opacity:'1'});
+      global.document={title:'Editor',querySelectorAll:s=>s.startsWith('[role=dialog]')?[]:[e],elementFromPoint:()=>e};
+      console.log(JSON.stringify(""" + DOM_SNAPSHOT_JS + "));"
+    out = subprocess.run(['node', '-e', fake], capture_output=True, text=True, encoding='utf8', check=True).stdout
+    snap = json.loads(out)
+    assert snap['elements'] and 'typed_private_marker' not in out and 'typed_private_marker' not in DomAdapter()(snap)
+    assert snap['elements'][0]['role'] == 'textbox'
+
+
 CASES = [v for k, v in sorted(globals().items()) if k.startswith('test_') and callable(v)]
 
 if __name__ == '__main__':

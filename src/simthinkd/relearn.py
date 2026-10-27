@@ -19,6 +19,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from .router import SkillTable
 
 RELEARN_SCHEMA = 'simthinkd-relearn/1'
 
@@ -93,9 +94,12 @@ def relearn(router, teacher, observations, base_examples=(), out='relearned', *,
     decider = trainer(examples, actions, goal=preset.get('goal', ''), out=str(out), steps=steps, seed=seed,
                       name=Path(str(out)).name, quiet=quiet)
     train_seconds = time.perf_counter() - started
-    router.swap(decider)
     if skills is not None:
-        router.skills.update(skills)
+        candidate = SkillTable(router.skills.items()).update(skills)   # raises before anything changes
+    with router._lock:                                              # model and skills change together
+        router.swap(decider)
+        if skills is not None:
+            router.skills._skills = dict(candidate.items())                # same table object, new contents
     if monitor is not None:
         monitor.reset()
     report = RelearnReport(at=datetime.now(timezone.utc).isoformat(timespec='seconds'), trigger=trigger,

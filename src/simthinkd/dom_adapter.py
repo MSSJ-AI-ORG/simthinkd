@@ -40,6 +40,7 @@ DOM_SNAPSHOT_JS = r"""(() => {
   const DQ = '[role=dialog],[role=alertdialog],dialog,[aria-modal=true]', dialogs = Array.from(document.querySelectorAll(DQ));
   const roleOf = (e) => {
     const r = e.getAttribute('role'); if (r) return r;
+    if (e.isContentEditable) return 'textbox';
     const tag = e.tagName.toLowerCase();
     if (tag === 'a') return 'link';
     if (tag === 'select') return 'combobox';
@@ -55,7 +56,8 @@ DOM_SNAPSHOT_JS = r"""(() => {
     const tag = e.tagName.toLowerCase();
     if (!n && tag === 'input') { const ty = (e.getAttribute('type') || 'text').toLowerCase();
       n = (ty === 'submit' || ty === 'button') ? (e.getAttribute('value') || '') : (e.getAttribute('placeholder') || ''); }
-    if (!n && tag !== 'input' && tag !== 'textarea' && tag !== 'select') n = e.innerText || '';
+    const editable = e.isContentEditable || (e.querySelector && e.querySelector('[contenteditable]:not([contenteditable=false])'));
+    if (!n && tag !== 'input' && tag !== 'textarea' && tag !== 'select' && !editable) n = e.innerText || '';
     if (!n) n = e.getAttribute('title') || e.getAttribute('alt') || '';
     return n.replace(/\s+/g, ' ').trim().slice(0, 60); };
   for (const e of document.querySelectorAll(sel)) {
@@ -340,10 +342,13 @@ class PopupGuard:
         return PopupVerdict(ok, reason, control, others, (time.perf_counter() - t0) * 1000)
 
     def _check(self, snapshot):
-        els = [e for e in _elements(snapshot) if e.get('dialog') and not e.get('covered')]
-        if not els:
+        # Every control of the dialog counts for "does it ask for a decision", covered or not: a partly covered Pay
+        # button is still a decision. Covered controls are only excluded as the control to press.
+        els = [e for e in _elements(snapshot) if e.get('dialog')]
+        visible = [e for e in els if not e.get('covered')]    # a dialog with no uncovered control is not showing
+        if not visible:
             return False, 'no_dialog', None, ()
-        top = max(int(e['dialog']) for e in els)
+        top = max(int(e['dialog']) for e in visible)
         els = sorted((e for e in els if int(e['dialog']) == top), key=_order)
         kinds = [(self.kind(e.get('name')), e) for e in els]
         others = tuple(e.get('name', '') for k, e in kinds if k == 'other')
@@ -351,7 +356,7 @@ class PopupGuard:
             return False, 'decision_needed', None, others
         for want in ('close', 'never'):
             for k, e in kinds:
-                if k == want and e.get('enabled', True) is not False:
+                if k == want and e.get('enabled', True) is not False and not e.get('covered'):
                     if want == 'never' and not self.allow_never_again:
                         return False, 'never_again_not_allowed', None, (e.get('name', ''),)
                     return True, None, e, ()

@@ -469,6 +469,16 @@ def test_public_api_of_030_is_unchanged():
     assert str(Route('action', 'A', 0.5, 'GO')).startswith('GO [A 50%')
 
 
+def test_relearn_with_a_bad_skill_changes_nothing():
+    # review 0.5.0 F4: the model used to be swapped before the skills were checked
+    calls = []
+    r = Router(Stub(sha='old'), TABLE)
+    table_before = dict(r.skills.items())
+    assert refused(relearn, r, lambda o: 'LOGIN', ['x'], trainer=fake_trainer(calls), force=True, out='unused',
+                   skills={'LOGIN': ('FILL_LOGIN', [])})
+    assert r.decider.sha256 == 'old' and dict(r.skills.items()) == table_before
+
+
 CASES = [v for k, v in sorted(globals().items()) if k.startswith('test_') and callable(v)]
 
 if __name__ == '__main__':  # CI runs test files as scripts

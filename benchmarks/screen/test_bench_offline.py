@@ -97,3 +97,16 @@ def test_llm_press_maps_by_pressed_control():
     assert engine.canon_of('img', 'Download image 2', p) == 'DOWNLOAD'
     assert engine.canon_of('img', 'Watercolor', p) == 'PICK_STYLE'
     assert engine.canon_of('img', 'Buy credits', p) is None
+
+
+def test_model_press_checked_on_the_resolved_control():
+    # review 0.5.0 F1: "credits" resolved to "Buy credits" and was clicked
+    class Tab:
+        clicks = []
+        def find(self, label, nth):
+            return {'name': 'buy credits', 'names': ['buy credits'], 'cx': 10, 'cy': 20}
+        def click(self, *xy):
+            self.clicks.append(xy)
+    t = Tab()
+    act, n, note = engine.do_llm_action(t, ('PRESS', 'credits'))
+    assert note == 'irreversible_blocked' and n == 0 and not t.clicks
