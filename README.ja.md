@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <a href="README.ko.md">한국어</a> | <b>日本語</b></p>
 
-<!-- source-sha256: 0506029bad0e1f64ea71749be6ffc0705a5deee1a2863130495f72af8eaba790 -->
+<!-- source-sha256: 2b9cdb1509cf7644693e267cec5bb981026fe7a4855b17bfe93dbe4f59039eea -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: クラウドでの判断を代替するローカルバックアップ" width="100%"></p>
 
@@ -221,6 +221,10 @@ if not ok:
 自作の模擬 HR ERP では、大規模モデルだけを使うとミッション当たり平均 118.3 秒かかり、毎回 14 回の大規模モデル呼び出しが必要でした。前段に SimThink D を置くと 7.2 秒で、呼び出しは 0 回でした（それぞれ 3 回中 3 回成功、ローカルのヘッドレス Chrome）。模擬画像スタジオでは、大規模モデルだけを使うと 126.6 秒かかり、毎回 14 回呼び出しました。前段に SimThink D を置くと 18.7 秒で、呼び出しは 1 回でした。その 1 回は判断が必要なクレジットのポップアップで、必ず大規模モデルに引き継ぎます（それぞれ 3 回中 3 回成功、レビュー反映後）。それ以前に条件を固定して実行したときは 24.3 秒で、呼び出しは 1 回または 2 回でした。切り替わる途中でとらえた画面も引き継がれることがあったためです。最初に条件を固定して実行した際は、これらのミッションのうち 1 つが失敗しました。原因はベンチマークの実行プログラムにあり、修正済みです（CHANGELOG を参照）。
 `benchmarks/screen` で両方のアプリを再実行でき、コマンド 1 つで大規模モデルを接続できます。マニュアル:
 [docs/SCREEN.md](docs/SCREEN.md)。
+
+<p align="center"><a href="assets/screen_demos.mp4"><img src="assets/screen_demos_poster.jpg" alt="画面操作のデモ" width="100%"></a></p>
+
+動画（4分13秒）：同じ作業を大規模モデル単独で行う場合と、SimThink D を前に置いた場合を並べて見せます。ノートPCでの Google フライト検索も含みます。フライト用モデルはその検索ひとつだけを学習しています。 [動画を見る（英語の説明）](assets/screen_demos.mp4)。
 
 ## 自分のモデルを測る
 

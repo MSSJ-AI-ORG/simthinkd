@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <b>한국어</b> | <a href="README.ja.md">日本語</a></p>
 
-<!-- source-sha256: 0506029bad0e1f64ea71749be6ffc0705a5deee1a2863130495f72af8eaba790 -->
+<!-- source-sha256: 2b9cdb1509cf7644693e267cec5bb981026fe7a4855b17bfe93dbe4f59039eea -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: 클라우드 판단을 대신하는 로컬 백업" width="100%"></p>
 
@@ -222,6 +222,10 @@ if not ok:
 자체 모의 HR ERP에서 큰 모델만 사용했을 때는 임무당 평균 118.3초가 걸렸고 큰 모델을 매번 14회 호출했습니다. 앞에 SimThink D를 두었을 때는 7.2초가 걸렸고 호출은 0회였습니다(각각 3회 중 3회 성공, 로컬 헤드리스 Chrome). 모의 이미지 스튜디오에서는 큰 모델만 사용했을 때 126.6초가 걸렸고 매번 14회 호출했습니다. 앞에 SimThink D를 두었을 때는 18.7초가 걸렸고 호출은 1회였습니다. 그 1회는 결정이 필요한 크레딧 팝업으로, 항상 큰 모델에 넘깁니다(각각 3회 중 3회 성공, 검토 반영 뒤). 그 전에 조건을 고정해 실행했을 때는 24.3초에 호출이 1회 또는 2회였습니다. 바뀌는 중간에 잡힌 화면이 함께 넘어간 경우가 있었기 때문입니다. 처음 조건을 고정해 실행했을 때는 이 임무 중 하나가 실패했습니다. 원인은 벤치마크 실행기에 있었으며 수정했습니다(CHANGELOG 참조).
 `benchmarks/screen`으로 두 앱을 다시 실행할 수 있으며, 명령 하나로 큰 모델을 연결합니다. 사용 설명서:
 [docs/SCREEN.md](docs/SCREEN.md).
+
+<p align="center"><a href="assets/screen_demos.mp4"><img src="assets/screen_demos_poster.jpg" alt="화면 제어 시연: 큰 모델 혼자와 SimThink D를 앞에 둔 경우" width="100%"></a></p>
+
+영상(4분 13초): 같은 일을 큰 모델 혼자 할 때와 SimThink D를 앞에 둘 때를 나란히 봅니다. 노트북에서 한 구글 항공편 검색도 들어 있습니다. 항공편 모델은 그 검색 하나만 배웠습니다. [영상 보기(영문 설명)](assets/screen_demos.mp4).
 
 ## 내 모델의 판단 시간 측정하기
 

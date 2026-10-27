@@ -230,6 +230,10 @@ SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local headless
 `benchmarks/screen` reruns both apps; a large model is plugged in through one command. Manual:
 [docs/SCREEN.md](docs/SCREEN.md).
 
+<p align="center"><a href="assets/screen_demos.mp4"><img src="assets/screen_demos_poster.jpg" alt="Screen-control demos: a large model alone and SimThink D in front, side by side" width="100%"></a></p>
+
+Video (4 min 13 s): the same tasks with a large model alone and with SimThink D in front, including a Google Flights search on a laptop. The flight model learned only that one search. [Watch the video](assets/screen_demos.mp4).
+
 ## Measure your own model
 
 Does your model fit inside one tick? `simthinkd bench` replays 1,050 recorded Doom states that ship with the package. It times every decision, one request at a time.
