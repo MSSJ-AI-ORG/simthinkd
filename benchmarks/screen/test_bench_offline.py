@@ -88,3 +88,12 @@ def test_image_side_effects_rejected():
     for event in ('buy_credits','cookie_all'):
         assert not engine.success('img',{'generated':{**p,'adv':True},'downloaded':[2],'events':[event]},p,True)
 
+
+
+def test_llm_press_maps_by_pressed_control():
+    # r1 img decider rep 2: the model said "Download #2", the page pressed "Download image 2";
+    # leaving it unmapped made the router download the same image again.
+    p = bench.mission('img', 1)
+    assert engine.canon_of('img', 'Download image 2', p) == 'DOWNLOAD'
+    assert engine.canon_of('img', 'Watercolor', p) == 'PICK_STYLE'
+    assert engine.canon_of('img', 'Buy credits', p) is None

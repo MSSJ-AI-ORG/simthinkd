@@ -106,6 +106,19 @@ CANON = {'erp': {'직원': 'NAV_EMP', '검색': 'SEARCH', '수정': 'EDIT', '재
                  'advanced options': 'OPEN_ADV', 'generate': 'GENERATE', 'continue': 'GENERATE', 'generate ✦': 'GENERATE'}}
 
 
+def canon_of(app, name, p):
+    """Training-vocabulary action for a pressed control: fixed names first, then the mission's own labels."""
+    key = _norm(name)
+    if key in CANON[app]:
+        return CANON[app][key]
+    label = APPS[app]['label']
+    for action in set(a[0] for a in APPS[app]['plan'](p).values()):
+        lab = label(action, p)
+        if lab and _norm(lab) == key:
+            return action
+    return None
+
+
 def instr(app, p):
     if app == 'erp':
         return (f"인사 ERP 화면에서 세 가지 일을 차례로 끝내세요. (1) 직원 메뉴에서 '{p['employee']}' 직원을 검색해 그 사람 정보를 여세요. "
@@ -502,12 +515,16 @@ def run(app, cond, rep, record=False, brain=None):
             rec_['t_llm_end'] = T()
             n_llm += 1
             rec_.update(llm_ms=ms, llm=meta, llm_answer=list(ans))
+            n0 = len(o['presses'])
             act, n, note = do_llm_action(tab, ans)
             rec_.update(action=act, presses=n, note=note)
             if act == 'DONE':
                 claimed = True
             elif act.startswith('PRESS:'):
-                c = CANON[app].get(_norm(act[6:]))
+                # Map by the control actually pressed, not the model's wording ("Download #2" pressed "Download image 2").
+                got = oracle(tab)['presses'][n0:]
+                rec_['pressed'] = got
+                c = canon_of(app, got[0] if got else act[6:], p)
                 if c:
                     canon_prev = c
             dismissed_in_row = 0
