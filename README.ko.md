@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <b>한국어</b> | <a href="README.ja.md">日本語</a></p>
 
-<!-- source-sha256: 0d8ed72622e2e8e4435a10de7e5ceef6a3f5b745c19aee673ba6fde4693469c8 -->
+<!-- source-sha256: e559800b412ee1835dc7de0a036ba74c4f7a464540a36e008e8d833256df43c6 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: 클라우드 판단을 대신하는 로컬 백업" width="100%"></p>
 
@@ -193,6 +193,35 @@ else:
 - 어댑터는 서로 다른 입력을 판단기가 읽는 문장으로 바꿉니다. `ScreenAdapter`는 스크린샷의 색상 격자·창 제목·이전 행동을, `PipelineAdapter`는 요청 항목과 게이트 판정을, `VectorAdapter`는 로봇 관측 벡터의 일부를 사용합니다. 판단기는 그대로이고 입력만 달라집니다.
 
 [examples/router_screen](examples/router_screen/)은 네트워크 없이 작은 모의 화면 작업에서 이 과정을 모두 실행합니다. 변경할 수 없도록 고정한 사전등록 문서와 직접 실험할 때 쓸 템플릿도 포함되어 있습니다. 조건을 고정한 실행에서는 의도적으로 잘못된 행동 12개 중 12개를 다음 화면에서 잡아냈습니다. 화면 디자인을 바꾼 뒤에는 교사 라벨 101개와 3.7초의 학습으로, 처리를 넘기는 비율이 라우팅 58회 중 41회에서 96회 중 0회로 내려갔습니다. 자세한 내용: [docs/ROUTER.md](docs/ROUTER.md).
+
+## 화면 조작하기
+
+0.5.0에 새로 추가된 화면 도구 모음(screen kit)입니다. 잘못 클릭하면 시간이 들거나 되돌릴 수 없는 실제 화면에서 라우터를 사용할 때 필요한 보호 기능을 제공합니다.
+
+```python
+from simthinkd import NoClickBands, open_or_press, ExpectAfter, RuleFirst, PageTextCheck
+
+bands = NoClickBands(top=96, bottom_from=700)            # fixed header and footer of the site
+kind, where = open_or_press(element, allow=lambda href: "/item/" in href)
+if kind == "open":
+    browser.goto(where)                                    # a link: open it, do not wait for a click
+elif bands.allows(where):
+    browser.click(*where)
+ok, state, ms = ExpectAfter(read_state, timeout=5.0).wait({"CART"})
+if not ok:
+    action = ask_large_model(screenshot)                   # the step went nowhere: hand over
+```
+
+- `NoClickBands`는 페이지를 가리는 고정 머리글과 바닥글을 클릭하지 않도록 합니다.
+- `open_or_press`는 카드를 클릭한 뒤 새 탭을 기다리는 대신 링크 주소를 직접 엽니다.
+- `ExpectAfter`는 행동 후 정해진 시간 안에 예상한 화면이 나타나는지 확인합니다.
+- `RuleFirst`는 확실한 규칙이 있는 경우 규칙을 사용하고, 그렇지 않은 경우에만 판단기에 묻습니다.
+- `PageTextCheck`는 스크린샷 대신 페이지의 텍스트로 성공 여부를 판단합니다.
+- 이번 버전에 함께 포함된 `DomVerifier`와 `PopupGuard`는 확신을 갖고 빠른 행동을 실행하기 전에 페이지 구조를 확인하며, 결정을 요구하는 팝업은 닫지 않습니다.
+
+자체 모의 HR ERP에서 큰 모델만 사용했을 때는 임무당 평균 118.3초가 걸렸고 큰 모델을 매번 14회 호출했습니다. 앞에 SimThink D를 두었을 때는 7.2초가 걸렸고 호출은 0회였습니다(각각 3회 중 3회 성공, 로컬 헤드리스 Chrome). 모의 이미지 스튜디오에서는 큰 모델만 사용했을 때 126.6초가 걸렸고 매번 14회 호출했습니다. 앞에 SimThink D를 두었을 때는 24.3초가 걸렸고 호출은 1회 또는 2회였습니다. 결정이 필요한 크레딧 팝업은 항상 큰 모델에 넘기기 때문입니다(각각 3회 중 3회 성공). 처음 조건을 고정해 실행했을 때는 이 임무 중 하나가 실패했습니다. 원인은 벤치마크 실행기에 있었으며 수정했습니다(CHANGELOG 참조).
+`benchmarks/screen`으로 두 앱을 다시 실행할 수 있으며, 명령 하나로 큰 모델을 연결합니다. 사용 설명서:
+[docs/SCREEN.md](docs/SCREEN.md).
 
 ## 내 모델의 판단 시간 측정하기
 

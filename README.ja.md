@@ -1,6 +1,6 @@
 <p align="center"><a href="README.md">English</a> | <a href="README.ko.md">한국어</a> | <b>日本語</b></p>
 
-<!-- source-sha256: 0d8ed72622e2e8e4435a10de7e5ceef6a3f5b745c19aee673ba6fde4693469c8 -->
+<!-- source-sha256: e559800b412ee1835dc7de0a036ba74c4f7a464540a36e008e8d833256df43c6 -->
 
 <p align="center"><img src="assets/banner_v2.png" alt="SimThink D: クラウドでの判断を代替するローカルバックアップ" width="100%"></p>
 
@@ -192,6 +192,35 @@ else:
 - アダプターは、異なる入力を判断器が読む文に変換します。`ScreenAdapter` はスクリーンショットの色のグリッド、ウィンドウのタイトル、直前の行動を、`PipelineAdapter` はリクエストの項目とゲートの判定を、`VectorAdapter` はロボットの観測ベクトルの一部を使います。判断器はそのままで、入力だけが変わります。
 
 [examples/router_screen](examples/router_screen/) は、ネットワークを使わず、小さな模擬画面のタスクでこの一連の処理を実行します。変更できないように固定した事前登録文書と、自分で実験するためのテンプレートも含まれています。条件を固定した実行では、意図的に誤らせた行動 12 件のうち 12 件を次の画面で検出しました。画面のデザインを変更した後、教師のラベル 101 件と 3.7 秒の学習で、処理を引き継ぐ割合はルーティング 58 回中 41 回から 96 回中 0 回に下がりました。詳細: [docs/ROUTER.md](docs/ROUTER.md)。
+
+## 画面を操作する
+
+0.5.0 で追加された画面操作ツール（screen kit）です。誤ったクリックで時間を失ったり、操作を取り消せなかったりする実際の画面で、ルーターを使うための保護機能を提供します。
+
+```python
+from simthinkd import NoClickBands, open_or_press, ExpectAfter, RuleFirst, PageTextCheck
+
+bands = NoClickBands(top=96, bottom_from=700)            # fixed header and footer of the site
+kind, where = open_or_press(element, allow=lambda href: "/item/" in href)
+if kind == "open":
+    browser.goto(where)                                    # a link: open it, do not wait for a click
+elif bands.allows(where):
+    browser.click(*where)
+ok, state, ms = ExpectAfter(read_state, timeout=5.0).wait({"CART"})
+if not ok:
+    action = ask_large_model(screenshot)                   # the step went nowhere: hand over
+```
+
+- `NoClickBands` は、ページを覆う固定ヘッダーやフッターへのクリックを防ぎます。
+- `open_or_press` は、カードをクリックして新しいタブを待つ代わりに、リンクのアドレスを直接開きます。
+- `ExpectAfter` は、操作後に想定した画面が制限時間内に表示されるかを確認します。
+- `RuleFirst` は、確実なルールがある場合はそれを使い、それ以外の場合にだけ判断器に問い合わせます。
+- `PageTextCheck` は、スクリーンショットではなくページのテキストから成功を判定します。
+- 今回のリリースに含まれる `DomVerifier` と `PopupGuard` は、確信を持って高速な行動を実行する前にページ構造を確認し、判断を求めるポップアップは閉じません。
+
+自作の模擬 HR ERP では、大規模モデルだけを使うとミッション当たり平均 118.3 秒かかり、毎回 14 回の大規模モデル呼び出しが必要でした。前段に SimThink D を置くと 7.2 秒で、呼び出しは 0 回でした（それぞれ 3 回中 3 回成功、ローカルのヘッドレス Chrome）。模擬画像スタジオでは、大規模モデルだけを使うと 126.6 秒かかり、毎回 14 回呼び出しました。前段に SimThink D を置くと 24.3 秒で、呼び出しは 1 回または 2 回でした。判断が必要なクレジットのポップアップは必ず大規模モデルに引き継ぐためです（それぞれ 3 回中 3 回成功）。最初に条件を固定して実行した際は、これらのミッションのうち 1 つが失敗しました。原因はベンチマークの実行プログラムにあり、修正済みです（CHANGELOG を参照）。
+`benchmarks/screen` で両方のアプリを再実行でき、コマンド 1 つで大規模モデルを接続できます。マニュアル:
+[docs/SCREEN.md](docs/SCREEN.md)。
 
 ## 自分のモデルを測る
 
