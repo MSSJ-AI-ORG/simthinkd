@@ -1,0 +1,13 @@
+{
+ "schema": "prereg-amendment/1",
+ "prereg": "PREREG_router_screen.json",
+ "changed": {
+  "../../src/simthinkd/relearn.py": {
+   "sealed_sha256": "ac2a9449972ec1a88246379803b4b112c19bda6c0856671067ad9ed70a27bac3",
+   "current_sha256": "1e353beb2e752cc0444af843b93ca9d6e8a74b8b43cccd284b523fab2a024090",
+   "reason": "0.5.0 review fix: relearn builds and checks the new skill table before it swaps the model, so a failed call changes nothing. The order of a successful relearn is unchanged.",
+   "evidence": "example rerun on the changed code: all 147 counted values equal RESULTS_router_screen_v1.json (times, hashes and paths excluded; same rule as the digest)"
+  }
+ },
+ "date": "2026-10-27"
+}

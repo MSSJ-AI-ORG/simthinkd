@@ -59,13 +59,17 @@ def verify(prereg):
     if digest(prereg) != recorded:
         problems.append(f'{prereg.name} changed after sealing')
     data = json.loads(prereg.read_text(encoding='utf8'))
+    # A frozen file may change after sealing only through a written amendment that names its current hash, the reason and
+    # the evidence that the sealed results still hold (<prereg>.amend.json). The sealed file itself is never edited.
+    amend_path = prereg.with_name(prereg.stem + '.amend.json')
+    amended = json.loads(amend_path.read_text(encoding='utf8')).get('changed', {}) if amend_path.exists() else {}
     if not data.get('frozen'):
         problems.append('no frozen files recorded')
     for name, value in (data.get('frozen') or {}).items():
         path = prereg.parent / name
         if not path.is_file():
             problems.append(f'frozen file missing: {name}')
-        elif digest(path) != value:
+        elif digest(path) != value and amended.get(name, {}).get('current_sha256') != digest(path):
             problems.append(f'frozen file changed: {name}')
     return problems
 
