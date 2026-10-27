@@ -50,14 +50,16 @@ DOM_SNAPSHOT_JS = r"""(() => {
       if (ty === 'submit' || ty === 'button' || ty === 'reset') return 'button';
       return 'textbox'; }
     return tag === 'button' ? 'button' : tag; };
+  // visible text of a node, but never text a person typed: nothing from an editable node or one that holds an editable node
+  const textOf = (x) => (!x || x.isContentEditable || (x.querySelector && x.querySelector('[contenteditable]:not([contenteditable=false])')))
+    ? '' : (x.innerText || '');
   const nameOf = (e) => {
     let n = e.getAttribute('aria-label') || '';
-    if (!n && e.labels && e.labels.length) n = e.labels[0].innerText || '';
+    if (!n && e.labels && e.labels.length) n = textOf(e.labels[0]);
     const tag = e.tagName.toLowerCase();
     if (!n && tag === 'input') { const ty = (e.getAttribute('type') || 'text').toLowerCase();
       n = (ty === 'submit' || ty === 'button') ? (e.getAttribute('value') || '') : (e.getAttribute('placeholder') || ''); }
-    const editable = e.isContentEditable || (e.querySelector && e.querySelector('[contenteditable]:not([contenteditable=false])'));
-    if (!n && tag !== 'input' && tag !== 'textarea' && tag !== 'select' && !editable) n = e.innerText || '';
+    if (!n && tag !== 'input' && tag !== 'textarea' && tag !== 'select') n = textOf(e);
     if (!n) n = e.getAttribute('title') || e.getAttribute('alt') || '';
     return n.replace(/\s+/g, ' ').trim().slice(0, 60); };
   for (const e of document.querySelectorAll(sel)) {

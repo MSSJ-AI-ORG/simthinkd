@@ -255,6 +255,21 @@ def test_snapshot_never_reads_typed_text_of_an_editable_element():
     snap = json.loads(out)
     assert snap['elements'] and 'typed_private_marker' not in out and 'typed_private_marker' not in DomAdapter()(snap)
     assert snap['elements'][0]['role'] == 'textbox'
+    # the same through a checkbox's label that holds an editable box (re-review F3), while a plain label still names it
+    def label_case(label_js):
+        js = ("const label=" + label_js + ";const e={tagName:'INPUT',labels:[label],isContentEditable:false,disabled:false,"
+              "querySelector:()=>null,getAttribute:k=>({type:'checkbox'})[k]||null,"
+              "getBoundingClientRect:()=>({width:100,height:30,right:100,bottom:30,left:0,top:0}),closest:()=>null,contains:()=>false};"
+              "global.window={innerWidth:800,innerHeight:600};global.innerWidth=800;global.innerHeight=600;"
+              "global.location={pathname:'/'};global.performance={now:()=>0};"
+              "global.getComputedStyle=()=>({visibility:'visible',display:'block',opacity:'1'});"
+              "global.document={title:'Form',querySelectorAll:s=>s.startsWith('[role=dialog]')?[]:[e],elementFromPoint:()=>e};"
+              "console.log(JSON.stringify(" + DOM_SNAPSHOT_JS + "));")
+        return json.loads(subprocess.run(['node', '-e', js], capture_output=True, text=True, encoding='utf8', check=True).stdout)
+    typed = label_case("{innerText:'typed_private_marker',querySelector:()=>({isContentEditable:true})}")
+    assert 'typed_private_marker' not in json.dumps(typed)
+    plain = label_case("{innerText:'Remember me',querySelector:()=>null}")
+    assert plain['elements'][0]['name'] == 'Remember me'
 
 
 CASES = [v for k, v in sorted(globals().items()) if k.startswith('test_') and callable(v)]
