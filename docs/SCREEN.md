@@ -33,7 +33,7 @@ screen ─► capture (+ DOM snapshot) ─► Router: state, confidence ─► V
 
 On a synthetic HR ERP (our own test app, fixed layout, synthetic data), a large model alone took 118.3 s per mission on
 average with 14 large-model calls; with SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local
-headless Chrome, sealed before measuring). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 24.3 s with 1 or 2 calls, because the decision-bearing credits popup always goes to the large model (3 of 3 runs each). In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG). On a live
+headless Chrome, sealed before measuring). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 18.7 s with 1 call, for the credits popup, which asks for a decision and always goes to the large model (3 of 3 runs each, after the review fixes). An earlier sealed run took 24.3 s with 1 or 2 calls: a screen caught halfway through a change was sometimes handed over as well. In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG). On a live
 shopping site (code not published), the guards on this page took one mission from 80.8 s to 29.2 s on average (three runs for each
 of the four steps, 12 of 12 succeeded). The benchmark in `benchmarks/screen` reruns the synthetic part; see [REPRODUCE.md](REPRODUCE.md).
 

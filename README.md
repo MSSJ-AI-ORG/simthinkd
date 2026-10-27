@@ -226,7 +226,7 @@ if not ok:
   never close a popup that asks for a decision.
 
 On our synthetic HR ERP, a large model alone took 118.3 s per mission on average (14 large-model calls each); with
-SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local headless Chrome). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 24.3 s with 1 or 2 calls, because the decision-bearing credits popup always goes to the large model (3 of 3 runs each). In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG).
+SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local headless Chrome). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 18.7 s with 1 call, for the credits popup, which asks for a decision and always goes to the large model (3 of 3 runs each, after the review fixes). An earlier sealed run took 24.3 s with 1 or 2 calls: a screen caught halfway through a change was sometimes handed over as well. In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG).
 `benchmarks/screen` reruns both apps; a large model is plugged in through one command. Manual:
 [docs/SCREEN.md](docs/SCREEN.md).
 
