@@ -3,6 +3,8 @@
 ## 0.5.0 - unreleased
 
 - Screen actions (`src/simthinkd/screen_actions.py`, new module): general forms of the guards that cut one live screen-control mission from 80.8 s to 29.2 s (12 of 12 runs succeeded; the site code is not published). `NoClickBands` keeps clicks out of fixed header and footer bands that the accessibility tree misses. `open_or_press` opens a plain http(s) link by its address instead of clicking its card. `ExpectAfter` waits for one of the expected screens after an action and reports a miss. `RuleFirst` uses a known rule before asking the decider, and a rule that raises never blocks the fallback. `PageTextCheck` judges success from page text or a counter that grew. Every site value is passed in by the caller. Tests: `tests/test_screen_actions.py`.
+- Screen benchmark (`benchmarks/screen`, new): two synthetic apps (an HR ERP and an image studio) in local headless Chrome, a runner with sealed seeds, and one command to plug in a large model (`bridge_codex.py` is an example). In our first sealed run one image-studio mission failed: the large model answered "Download #2", the page pressed "Download image 2", and the runner did not map that press to the decider's own action name, so the decider downloaded the same image again. The runner now maps a large-model press by the control actually pressed (`engine.canon_of`), with a test.
+- Docs: `docs/SCREEN.md` (manual), a screen section in the README and on the project page, and the bench commands in `docs/REPRODUCE.md`.
 - This release also carries everything listed under 0.4.0 below; 0.4.0 was not published on its own.
 - No change to the 0.3.0 API.
 

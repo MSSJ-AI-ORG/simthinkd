@@ -167,7 +167,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <header class="hero">
   <div class="wrap">
     <div class="hero-text">
-      <a class="pill" href="https://pypi.org/project/simthinkd/" data-i18n="hero.pill">v0.3.0 · open source, Apache 2.0</a>
+      <a class="pill" href="https://pypi.org/project/simthinkd/" data-i18n="hero.pill">v0.5.0 · open source, Apache 2.0</a>
       <h1 data-i18n="hero.h1">A <em>tiny</em> decision model that keeps up with real time.</h1>
       <p class="sub" data-i18n="hero.sub">It reads one short sentence about the situation and picks an action in about 2&nbsp;ms on one CPU core.
         <strong>No GPU, not even for training.</strong></p>
@@ -221,6 +221,20 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     </div>
     <p class="note" data-i18n="factory.note">A simulated line, and the decider learned this line's own rules, so it has a home advantage.
       The simulator is in <a href="https://github.com/MSSJ-AI-ORG/simthinkd/tree/main/examples/factory_twin">examples/factory_twin</a>.</p>
+  </div>
+</section>
+
+<section id="screen">
+  <div class="wrap">
+    <div class="kicker" data-i18n="screen.kicker">New in 0.5.0: screen control</div>
+    <h2 data-i18n="screen.h2">Known screens fast. Unknown screens to the large model.</h2>
+    <p class="lead" data-i18n="screen.lead">SimThink D names the screen and does the scripted step in milliseconds. When it is unsure, when the page structure disagrees, or when a step leads nowhere, it hands the screen to a large model.</p>
+    <div class="stats">
+      <div class="stat"><b>118.3 s → 7.2 s</b><span data-i18n="screen.s1">per mission on a synthetic HR ERP, 3 of 3 runs each</span></div>
+      <div class="stat"><b>14 → 0</b><span data-i18n="screen.s2">large-model calls per ERP mission</span></div>
+      <div class="stat"><b>126.6 s → 24.3 s</b><span data-i18n="screen.s3">per mission on a synthetic image studio</span></div>
+    </div>
+    <p class="note" data-i18n="screen.note">Our own test apps with synthetic data, run in local headless Chrome; they do not show that it works on any other site. The benchmark is in <a href="https://github.com/MSSJ-AI-ORG/simthinkd/tree/main/benchmarks/screen">benchmarks/screen</a> and the manual in <a href="https://github.com/MSSJ-AI-ORG/simthinkd/blob/main/docs/SCREEN.md">docs/SCREEN.md</a>.</p>
   </div>
 </section>
 

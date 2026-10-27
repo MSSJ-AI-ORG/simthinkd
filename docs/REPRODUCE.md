@@ -29,6 +29,26 @@ python -c "import hashlib, simthinkd, pathlib; p = pathlib.Path(simthinkd.__file
 
 Your timing numbers will differ from the paper's. They depend on your CPU and operating system, and the paper shows that the host matters.
 
+## Screen benchmark (0.5.0)
+
+The screen numbers in the README and [SCREEN.md](SCREEN.md) come from `benchmarks/screen`: two synthetic apps (an HR ERP
+and an image studio), local headless Chrome, and a large model plugged in through one command.
+
+```bash
+python -m pip install -e ".[train]" pillow websocket-client pytest
+cd benchmarks/screen
+python -m pytest -q test_bench_offline.py                                    # offline, no Chrome
+python run.py --app erp --cond decider --seed 502 --reps 3 --out runs/erp_decider
+python run.py --app erp --cond llm     --seed 502 --reps 3 --out runs/erp_llm --llm-cmd '["python", "bridge_codex.py"]'
+python run.py --app img --cond decider --seed 601 --reps 3 --out runs/img_decider --llm-cmd '["python", "bridge_codex.py"]'
+python run.py --app img --cond llm     --seed 601 --reps 3 --out runs/img_llm --llm-cmd '["python", "bridge_codex.py"]'
+```
+
+Each run writes `SUMMARY.json` and one timing file per repetition. Seeds, conditions and order are the ones we sealed
+before measuring. Times depend on your machine and on the large model's response time; success counts and large-model
+calls are the parts to compare. The live shopping-site figures in SCREEN.md are not reproducible from this repository:
+that code is not published.
+
 ## What is not in this repository yet
 
 | Paper item | Status |

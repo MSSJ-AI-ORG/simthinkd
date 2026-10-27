@@ -198,6 +198,38 @@ It includes a sealed preregistration and a template for your own experiments. In
 wrong actions were caught at the next screen. After a redesign, 101 teacher labels and 3.7 s of training brought the
 hand-over rate from 41 of 58 routes back to 0 of 96. Details: [docs/ROUTER.md](docs/ROUTER.md).
 
+## Drive a screen
+
+New in 0.5.0 (screen kit). Guards for putting the router on a real screen, where a wrong click costs time or cannot be
+undone.
+
+```python
+from simthinkd import NoClickBands, open_or_press, ExpectAfter, RuleFirst, PageTextCheck
+
+bands = NoClickBands(top=96, bottom_from=700)            # fixed header and footer of the site
+kind, where = open_or_press(element, allow=lambda href: "/item/" in href)
+if kind == "open":
+    browser.goto(where)                                    # a link: open it, do not wait for a click
+elif bands.allows(where):
+    browser.click(*where)
+ok, state, ms = ExpectAfter(read_state, timeout=5.0).wait({"CART"})
+if not ok:
+    action = ask_large_model(screenshot)                   # the step went nowhere: hand over
+```
+
+- `NoClickBands` keeps clicks off fixed headers and footers that cover the page.
+- `open_or_press` opens a link by its address instead of clicking a card and waiting for a new tab.
+- `ExpectAfter` checks that the expected screen appears in time after an action.
+- `RuleFirst` uses a rule where one is certain and asks the decider only where it is not.
+- `PageTextCheck` decides success from the page text, not from a screenshot.
+- `DomVerifier` and `PopupGuard` (also in this release) check the page structure before a confident fast action, and
+  never close a popup that asks for a decision.
+
+On our synthetic HR ERP, a large model alone took 118.3 s per mission on average (14 large-model calls each); with
+SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local headless Chrome). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 24.3 s with 1 or 2 calls, because the decision-bearing credits popup always goes to the large model (3 of 3 runs each). In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG).
+`benchmarks/screen` reruns both apps; a large model is plugged in through one command. Manual:
+[docs/SCREEN.md](docs/SCREEN.md).
+
 ## Measure your own model
 
 Does your model fit inside one tick? `simthinkd bench` replays 1,050 recorded Doom states that ship with the package. It times every decision, one request at a time.

@@ -31,8 +31,9 @@ screen ─► capture (+ DOM snapshot) ─► Router: state, confidence ─► V
 
 ## What we measured
 
-On a synthetic HR ERP (our own test app, fixed layout, synthetic data), a large model alone took 143.5 s per mission on
-average with 14 large-model calls; with SimThink D in front it took 7.3 s with 0 calls (3 of 3 runs each). On a live
+On a synthetic HR ERP (our own test app, fixed layout, synthetic data), a large model alone took 118.3 s per mission on
+average with 14 large-model calls; with SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local
+headless Chrome, sealed before measuring). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 24.3 s with 1 or 2 calls, because the decision-bearing credits popup always goes to the large model (3 of 3 runs each). In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG). On a live
 shopping site (code not published), the guards on this page took one mission from 80.8 s to 29.2 s on average, 12 of
 12 runs succeeded. The benchmark in `benchmarks/screen` reruns the synthetic part; see [REPRODUCE.md](REPRODUCE.md).
 
@@ -41,4 +42,7 @@ shopping site (code not published), the guards on this page took one mission fro
 - It is fast on screens it has learned. An unseen screen goes to the DOM check or the large model.
 - A screenshot-only decider read an unseen popup as a known screen with high confidence (0 of 3 on our image-site
   app); use the DOM check.
+- A screen caught halfway through a change (results appearing while generation ends) can get a low confidence and be
+  handed to the large model, which costs one extra call (about 9 s in our image-studio runs). Waiting first would be
+  cheaper; we have not measured that yet.
 - Site values (bands, link filters, success words) are the caller's. Nothing here is tuned to one site.
