@@ -1,13 +1,14 @@
 """Screen actions: small guards that make fast screen control faster and safer, with no site-specific values inside.
 
-They come from a live shopping-site run where four changes cut one mission from 80.8 s to 29.2 s (12/12 runs succeeded):
+They come from a live shopping-site run where four changes cut one mission from 80.8 s to 29.2 s on average
+(three runs for each of the four steps, 12 of 12 succeeded):
 press lightly instead of moving a human-like cursor, open a result link by its address instead of clicking its card,
 use a rule where one is known before asking the decider, and judge success from page text. Every site value (band
 heights, link patterns, success words) is passed in by the caller.
 
     from simthinkd import NoClickBands, ExpectAfter, open_or_press, RuleFirst, PageTextCheck
-    bands = NoClickBands(top=345, bottom_from=940)          # fixed header / footer that the accessibility tree misses
-    bands.allows((640, 300))                                 # False: inside the header band
+    bands = NoClickBands(top=96, bottom_from=700)           # illustrative values: fixed header / footer of your site
+    bands.allows((640, 50))                                  # False: inside the header band
     kind, value = open_or_press(element)                     # ('open', 'https://...') for a link, ('press', (x, y)) otherwise
     done = ExpectAfter(read_state, timeout=5.0)              # after pressing, the expected screen must appear in time
     ok, state, ms = done.wait({'PRODUCT'})

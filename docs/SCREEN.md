@@ -34,12 +34,15 @@ screen ─► capture (+ DOM snapshot) ─► Router: state, confidence ─► V
 On a synthetic HR ERP (our own test app, fixed layout, synthetic data), a large model alone took 118.3 s per mission on
 average with 14 large-model calls; with SimThink D in front it took 7.2 s with 0 calls (3 of 3 runs each, local
 headless Chrome, sealed before measuring). On a synthetic image studio, a large model alone took 126.6 s (14 calls each); with SimThink D in front it took 24.3 s with 1 or 2 calls, because the decision-bearing credits popup always goes to the large model (3 of 3 runs each). In our first sealed run one of these missions failed; the cause was in the benchmark runner and is fixed (see CHANGELOG). On a live
-shopping site (code not published), the guards on this page took one mission from 80.8 s to 29.2 s on average, 12 of
-12 runs succeeded. The benchmark in `benchmarks/screen` reruns the synthetic part; see [REPRODUCE.md](REPRODUCE.md).
+shopping site (code not published), the guards on this page took one mission from 80.8 s to 29.2 s on average (three runs for each
+of the four steps, 12 of 12 succeeded). The benchmark in `benchmarks/screen` reruns the synthetic part; see [REPRODUCE.md](REPRODUCE.md).
 
 ## Limits
 
-- It is fast on screens it has learned. An unseen screen goes to the DOM check or the large model.
+- It is fast on screens it has learned. A screen goes to the large model only when the decider is unsure, the DOM
+  check disagrees, a step made no progress, or a popup asks for a decision. An unseen screen that looks like a known
+  one, with the same page elements, can still be accepted wrongly, and an unfamiliar popup with only close controls
+  is closed locally.
 - A screenshot-only decider read an unseen popup as a known screen with high confidence (0 of 3 on our image-site
   app); use the DOM check.
 - A screen caught halfway through a change (results appearing while generation ends) can get a low confidence and be
