@@ -1,7 +1,18 @@
 {
-  "mode": "numbers",
-  "negative_control": "planted number rejected",
-  "rows": [],
-  "unsupported": 0,
-  "verdict": "pass"
+ "mode": "numbers",
+ "negative_control": "planted number rejected",
+ "rows": [],
+ "unsupported": 0,
+ "verdict": "pass",
+ "readme_sha256": "e559800b412ee1835dc7de0a036ba74c4f7a464540a36e008e8d833256df43c6",
+ "gate": "ground.py numbers --allow 96,700,5.0 (values in the code example)",
+ "sources": {
+  "CHANGELOG.md": "7696134eeb14c627e6fd46bfcf2c77690075fcf82d8fe3dc1b2fccd5f316ea2b",
+  "numbers_v050.json": "2c2dbaa993d9c8d0305f7f18ce3c9340269e6595a8798517540ffc8332763796",
+  "README_main_published.md": "bd9e6e90ae8546ee75e98accb4c1bb05a3178b199a65d3b409a6534ed2eb024e",
+  "RESULTS_router_screen_v1.json": "61fe133528a1903d895c2fe83da59e97401fc9803435f4b1bc8550907b82aa6a",
+  "ROUNDED.txt": "8e530dcf4b6380d4e42475808150a869c11a5c900d1abebd74dd1a1ae7f8e21b",
+  "ROUTER.md": "6f64911e01ee2597ee6f44d120605691bf4442f6961f766afc1ca910053fbb66"
+ },
+ "date": "2026-10-27"
 }
